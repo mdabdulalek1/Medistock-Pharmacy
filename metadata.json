@@ -1,0 +1,6 @@
+{
+  "name": "MediStock Pharmacy",
+  "description": "Multi-branch pharmacy management, batch inventory, POS billing, and online prescription dispensing platform for Bangladesh.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

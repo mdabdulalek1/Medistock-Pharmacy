@@ -1,0 +1,194 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "User profile with role-based access control and assigned branch",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "email": { "type": "string" },
+        "phone": { "type": "string" },
+        "role": {
+          "type": "string",
+          "enum": ["owner", "admin", "branch_manager", "pharmacist", "cashier", "inventory_manager", "customer"]
+        },
+        "branchId": { "type": "string" },
+        "branchName": { "type": "string" },
+        "active": { "type": "boolean" },
+        "registrationNumber": { "type": "string" }
+      },
+      "required": ["id", "name", "email", "role", "active"]
+    },
+    "Branch": {
+      "title": "Branch",
+      "description": "Pharmacy branch record with DGDA license and BIN",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "code": { "type": "string" },
+        "name": { "type": "string" },
+        "address": { "type": "string" },
+        "thana": { "type": "string" },
+        "district": { "type": "string" },
+        "phone": { "type": "string" },
+        "email": { "type": "string" },
+        "managerId": { "type": "string" },
+        "managerName": { "type": "string" },
+        "active": { "type": "boolean" },
+        "drugLicenseNo": { "type": "string" },
+        "taxBinNumber": { "type": "string" }
+      },
+      "required": ["id", "code", "name", "active"]
+    },
+    "Medicine": {
+      "title": "Medicine",
+      "description": "Pharmaceutical product catalogue entry",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "brandName": { "type": "string" },
+        "genericName": { "type": "string" },
+        "strength": { "type": "string" },
+        "dosageForm": { "type": "string" },
+        "manufacturer": { "type": "string" },
+        "category": { "type": "string" },
+        "barcode": { "type": "string" },
+        "isPrescriptionRequired": { "type": "boolean" },
+        "requiresColdChain": { "type": "boolean" },
+        "onlineEligible": { "type": "boolean" },
+        "unit": { "type": "string" },
+        "description": { "type": "string" },
+        "darNumber": { "type": "string" },
+        "active": { "type": "boolean" }
+      },
+      "required": ["id", "brandName", "genericName", "strength", "dosageForm", "manufacturer", "active"]
+    },
+    "Batch": {
+      "title": "Batch",
+      "description": "Individual manufacturing batch inventory per branch",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "medicineId": { "type": "string" },
+        "branchId": { "type": "string" },
+        "batchNumber": { "type": "string" },
+        "manufacturingDate": { "type": "string" },
+        "expiryDate": { "type": "string" },
+        "purchaseCost": { "type": "number" },
+        "sellingPrice": { "type": "number" },
+        "mrpPrice": { "type": "number" },
+        "currentQuantity": { "type": "number" },
+        "reservedQuantity": { "type": "number" },
+        "rackLocation": { "type": "string" }
+      },
+      "required": ["id", "medicineId", "branchId", "batchNumber", "expiryDate", "purchaseCost", "sellingPrice", "currentQuantity"]
+    },
+    "SaleInvoice": {
+      "title": "SaleInvoice",
+      "description": "Counter POS retail tax invoice",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "invoiceNumber": { "type": "string" },
+        "branchId": { "type": "string" },
+        "branchName": { "type": "string" },
+        "cashierId": { "type": "string" },
+        "cashierName": { "type": "string" },
+        "customerName": { "type": "string" },
+        "customerPhone": { "type": "string" },
+        "subtotal": { "type": "number" },
+        "discountAmount": { "type": "number" },
+        "vatAmount": { "type": "number" },
+        "totalAmount": { "type": "number" },
+        "paymentMethod": { "type": "string" },
+        "paymentReference": { "type": "string" },
+        "status": { "type": "string" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["id", "invoiceNumber", "branchId", "totalAmount", "paymentMethod", "status", "createdAt"]
+    },
+    "OnlineOrder": {
+      "title": "OnlineOrder",
+      "description": "Customer home delivery order with prescription certification status",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "orderNumber": { "type": "string" },
+        "customerId": { "type": "string" },
+        "customerName": { "type": "string" },
+        "customerPhone": { "type": "string" },
+        "deliveryAddress": { "type": "string" },
+        "thana": { "type": "string" },
+        "city": { "type": "string" },
+        "subtotal": { "type": "number" },
+        "deliveryFee": { "type": "number" },
+        "totalAmount": { "type": "number" },
+        "paymentMethod": { "type": "string" },
+        "paymentStatus": { "type": "string" },
+        "hasPrescriptionItems": { "type": "boolean" },
+        "prescriptionNote": { "type": "string" },
+        "prescriptionVerifiedBy": { "type": "string" },
+        "assignedBranchId": { "type": "string" },
+        "assignedBranchName": { "type": "string" },
+        "status": { "type": "string" },
+        "createdAt": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["id", "orderNumber", "customerPhone", "deliveryAddress", "totalAmount", "status", "createdAt"]
+    },
+    "StockMovement": {
+      "title": "StockMovement",
+      "description": "Append-only immutable stock transaction audit log",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "batchId": { "type": "string" },
+        "medicineId": { "type": "string" },
+        "medicineName": { "type": "string" },
+        "branchId": { "type": "string" },
+        "branchName": { "type": "string" },
+        "movementType": { "type": "string" },
+        "quantityDelta": { "type": "number" },
+        "previousQuantity": { "type": "number" },
+        "newQuantity": { "type": "number" },
+        "referenceId": { "type": "string" },
+        "notes": { "type": "string" },
+        "performedByUserId": { "type": "string" },
+        "performedByUserName": { "type": "string" },
+        "timestamp": { "type": "string" }
+      },
+      "required": ["id", "batchId", "branchId", "movementType", "quantityDelta", "timestamp"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/User" },
+      "description": "Collection of system users and customer accounts"
+    },
+    "/branches/{branchId}": {
+      "schema": { "$ref": "#/entities/Branch" },
+      "description": "Collection of pharmacy branch profiles"
+    },
+    "/medicines/{medicineId}": {
+      "schema": { "$ref": "#/entities/Medicine" },
+      "description": "Catalogue of registered pharmaceuticals"
+    },
+    "/batches/{batchId}": {
+      "schema": { "$ref": "#/entities/Batch" },
+      "description": "Branch-specific medicine batch inventories"
+    },
+    "/sales/{saleId}": {
+      "schema": { "$ref": "#/entities/SaleInvoice" },
+      "description": "Completed counter sales tax invoices"
+    },
+    "/onlineOrders/{orderId}": {
+      "schema": { "$ref": "#/entities/OnlineOrder" },
+      "description": "Customer online delivery orders"
+    },
+    "/stockMovements/{movementId}": {
+      "schema": { "$ref": "#/entities/StockMovement" },
+      "description": "Immutable stock ledger audit entries"
+    }
+  }
+}

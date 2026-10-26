@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="100%" height="100%" fill="none">
+  <rect width="120" height="120" rx="16" fill="#F3F6FA"/>
+  <rect x="1" y="1" width="118" height="118" rx="15" stroke="#E2E8F0" stroke-width="2"/>
+  <g transform="translate(30, 26)">
+    <!-- Pill capsule outline -->
+    <rect x="8" y="2" width="44" height="64" rx="22" fill="#FFFFFF" stroke="#17365D" stroke-width="3"/>
+    <!-- Top capsule cap with teal brand accent -->
+    <path d="M8 24 C8 11.85 17.85 2 30 2 C42.15 2 52 11.85 52 24 L8 24 Z" fill="#168C8C"/>
+    <!-- Center divider -->
+    <line x1="8" y1="24" x2="52" y2="24" stroke="#17365D" stroke-width="2.5"/>
+    <!-- Pharmacy Rx emblem -->
+    <path d="M23 40 L37 40 M30 33 L30 47" stroke="#17365D" stroke-width="3" stroke-linecap="round"/>
+  </g>
+  <text x="60" y="104" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="9" font-weight="600" fill="#64748B">MEDISTOCK</text>
+</svg>

@@ -1,0 +1,68 @@
+@import "tailwindcss";
+
+@theme {
+  --color-brand-navy: #123B5D;
+  --color-brand-navy-dark: #0A243A;
+  --color-brand-navy-light: #1D5482;
+  --color-brand-navy-subtle: #E8F0F7;
+  
+  --color-brand-teal: #079B8C;
+  --color-brand-teal-hover: #058276;
+  --color-brand-teal-light: #E0F7F4;
+  --color-brand-mint: #DDF6EF;
+  
+  --color-workspace: #F3F7FA;
+  --color-workspace-card: #FFFFFF;
+  --color-text-main: #203246;
+  --color-text-muted: #5A6E85;
+  
+  --color-semantic-success: #168653;
+  --color-semantic-success-light: #E7F6EE;
+  --color-semantic-warning: #E9A23B;
+  --color-semantic-warning-light: #FDF5E8;
+  --color-semantic-error: #D64545;
+  --color-semantic-error-light: #FAEAEA;
+}
+
+:root {
+  --brand-navy: #123B5D;
+  --brand-teal: #079B8C;
+  --brand-mint: #DDF6EF;
+  --brand-workspace: #F3F7FA;
+  --brand-text: #203246;
+  --brand-success: #168653;
+  --brand-warning: #E9A23B;
+  --brand-error: #D64545;
+}
+
+@layer base {
+  body {
+    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+    background-color: #F3F7FA;
+    color: #203246;
+  }
+  
+  .font-mono, [class*="font-mono"] {
+    font-family: 'JetBrains Mono', monospace;
+  }
+}
+
+/* Print styling for POS receipts and invoices */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  #printable-receipt, #printable-receipt * {
+    visibility: visible;
+  }
+  #printable-receipt {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    margin: 0;
+    padding: 16px;
+    background: white !important;
+    color: black !important;
+  }
+}

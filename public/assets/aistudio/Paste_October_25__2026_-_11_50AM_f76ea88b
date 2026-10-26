@@ -1,0 +1,1202 @@
+# MEDISTOCK PHARMACY — ULTIMATE MASTER BUILD PROMPT
+## Complete Pharmacy ERP + POS + Inventory + Multi-Branch Management + E-Commerce + Offline Operations
+
+Act as a complete team of senior professionals:
+- Pharmacy business owner and operations director
+- Enterprise software architect
+- Senior full-stack developer
+- Database engineer
+- Cybersecurity engineer
+- Pharmacy inventory and dispensing specialist
+- Retail POS and accounting specialist
+- Bangladesh e-commerce and payment integration specialist
+- UI/UX designer
+- Quality assurance and testing engineer
+- DevOps and backup/recovery engineer
+
+Your task is to transform my EXISTING Google AI Studio project into a professional, reliable, secure, production-oriented pharmacy management platform named **MediStock Pharmacy**.
+
+This system is intended for a real pharmacy business in Bangladesh with 6 or more retail branches, multiple staff members, potentially multiple billing tills per branch, a head-office management team, and customers who may order online or purchase directly from a store.
+
+I have already connected persistent storage and authentication. I have not yet implemented the full business system. Inspect the current project and build upon it.
+
+**Do not start over. Do not create a separate disconnected demo. Do not remove my existing authentication or persistent storage.**
+
+The final system should integrate all departments into one coherent business platform with consistent products, inventory, transactions, customers, suppliers, accounts, and reporting.
+
+---
+
+# PART 1 — NON-NEGOTIABLE DEVELOPMENT RULES
+
+Before implementing features:
+
+1. Inspect the existing source code, framework, routes, UI components, authentication provider, database, storage, existing schema, environment configuration, and current application behavior.
+2. Identify what is already implemented and what is missing.
+3. Preserve working functionality and existing user accounts.
+4. Never reset, drop, or overwrite existing database tables or business data just to simplify development.
+5. Never expose secret keys, service-role keys, payment credentials, or private API keys in frontend code.
+6. Use the existing backend and database wherever suitable. If the current architecture is incomplete, extend it carefully.
+7. Do not invent successful integrations, test results, real stock, transactions, or payment confirmations.
+8. Do not implement important business operations as frontend-only calculations or fake local state.
+9. Every important write operation must be validated and authorized on the server or through appropriately secured database operations.
+10. Use database transactions or equivalent atomic operations for sales, stock changes, refunds, payments, and transfers.
+11. Introduce versioned, reviewable, backward-compatible database migrations where possible. Never silently destroy data.
+12. Seed only clearly identified demo data in a separate development environment. Never mix demo data with live business records.
+13. Do not hardcode the number of branches, staff members, products, suppliers, or customers.
+14. Use real persisted records for dashboards, reports, and business metrics.
+15. If a feature requires external credentials, a local service, hardware, a paid service, or a deployment configuration, implement the feasible parts and clearly explain what remains.
+16. Do not claim production readiness merely because the interface renders.
+17. Keep the application maintainable, modular, responsive, accessible, and suitable for future expansion.
+
+First produce a concise architecture audit, then proceed with implementation in safe phases. Do not stop after producing a plan if you can safely implement the work.
+
+# PART 2 — BUSINESS STRUCTURE AND MULTI-BRANCH ARCHITECTURE
+
+Build a centralized pharmacy management platform with configurable branches.
+
+The system must support:
+
+- Head office and central administration.
+- Multiple retail branches.
+- Multiple tills and cashiers within each branch.
+- A central medicine and product catalog.
+- Branch-specific stock and pricing rules where authorized.
+- Centralized purchasing and supplier management.
+- Centralized accounting and financial reporting.
+- Online orders, delivery, and branch pickup.
+- Customer accounts and purchase history.
+- Inter-branch stock transfers.
+- Staff roles, permissions, approvals, and audit logs.
+- Centralized reporting across all branches.
+- Offline-capable branch operations where supported by the actual architecture.
+
+Every transaction must be associated with the appropriate branch, user, device or till, shift, timestamp, and transaction reference.
+
+Never combine branch inventory into one undifferentiated quantity. The system must distinguish:
+
+- Total company stock.
+- Available stock at each branch.
+- Reserved stock.
+- Damaged or quarantined stock.
+- Expired stock.
+- Stock in transit.
+- Stock awaiting inspection or receipt.
+- Stock allocated to orders.
+
+A branch manager should not automatically have permission to modify another branch's records. Head-office permissions should be configurable and audited.
+
+# PART 3 — USER ROLES AND PERMISSION SYSTEM
+
+Create a robust role-based access control system. A user's visible interface is not the security boundary: enforce authorization on the backend and database.
+
+Provide these configurable roles.
+
+## A. Business owner / super administrator
+
+The owner needs access to:
+
+- Company-wide dashboard.
+- All branches and departments.
+- Sales, gross profit, expenses, cash flow, and inventory valuation.
+- Revenue and margin comparisons across branches.
+- Staff and role management.
+- Branch configuration.
+- Purchasing and supplier performance.
+- Stock transfers and adjustments.
+- Financial reports and audit trails.
+- Payment reconciliation.
+- Low-stock and expiry alerts.
+- Approval queues and exception reports.
+- Business settings, tax settings, receipts, and numbering rules.
+- Backup status, system health, and synchronization status.
+- Security events and administrator activity.
+- Configurable approval thresholds and permission policies.
+
+High-risk actions must require appropriate authorization and, where configured, an additional approval. Do not give every employee unrestricted administrator access.
+
+## B. Head-office operations manager
+
+Provide access to:
+
+- All authorized branches.
+- Branch comparisons and performance dashboards.
+- Stock replenishment planning.
+- Transfer requests and approvals.
+- Supplier purchasing and delivery monitoring.
+- Branch opening and closing reports.
+- Staff assignments and operational exceptions.
+- Centralized alerts and approval queues.
+
+## C. Branch manager
+
+Provide access to:
+
+- Their assigned branch.
+- Branch sales, refunds, and cash reconciliation.
+- Staff shifts and till assignments.
+- Opening and closing checklists.
+- Branch stock and inventory discrepancies.
+- Purchase and transfer requests.
+- Low-stock and expiry alerts.
+- Discount, refund, and stock-adjustment approval within assigned limits.
+- Cashier performance and unusual transaction reports.
+- Delivery and pickup queues.
+- Offline synchronization failures.
+- Daily branch handover reports.
+
+Do not allow a branch manager to change completed financial records silently.
+
+## D. Cashier / POS operator
+
+Provide access to:
+
+- POS and barcode scanning.
+- Product search.
+- Cart and billing.
+- Permitted discounts.
+- Supported payment methods.
+- Receipt printing.
+- Hold and resume bill.
+- Shift opening and closing.
+- Cash declaration.
+- Their permitted sales and transaction history.
+- Returns and cancellations through the authorized workflow.
+
+Cashiers must not be able to change product cost, grant themselves additional permissions, alter payment confirmation, or make unrestricted stock adjustments.
+
+## E. Pharmacist / authorized dispensing staff
+
+Provide access to:
+
+- Product and medicine details.
+- Relevant batch and expiry information.
+- Prescription-review queue.
+- Restricted-product handling according to applicable requirements.
+- Dispensing checks and corrections.
+- Medicine safety flags and recall notices.
+- Appropriate customer and prescription information.
+- Dispensing and review history.
+
+Restrict access to sensitive prescription and health information to authorized personnel.
+
+## F. Inventory worker / storekeeper
+
+Provide access to:
+
+- Receiving deliveries.
+- Purchase-order matching.
+- Batch and expiry entry.
+- Stock counts and cycle counts.
+- Shelf and location management where configured.
+- Damaged, expired, and quarantined stock.
+- Stock adjustment requests.
+- Transfer packing and receiving.
+- Barcode labels.
+- Replenishment requests.
+- Stock discrepancy reports.
+
+Inventory workers should request approval for adjustments above their assigned limits.
+
+## G. Purchasing / supplier manager
+
+Provide access to:
+
+- Supplier directory.
+- Purchase requests and orders.
+- Supplier price comparisons.
+- Purchase history.
+- Delivery tracking.
+- Partial receiving.
+- Supplier invoices.
+- Supplier returns.
+- Purchase approval workflows.
+- Supplier payment status.
+- Reorder suggestions.
+
+Separate order creation, approval, receiving, and payment permissions where appropriate.
+
+## H. Accountant / finance officer
+
+Provide access to:
+
+- Sales summaries.
+- Cash and online payment reconciliation.
+- Refunds and credit notes.
+- Operating expenses.
+- Supplier invoices and payables.
+- Customer receivables where supported.
+- Cost of goods sold.
+- Gross profit and margins.
+- Branch cash settlement.
+- Financial period closing.
+- Exportable financial reports.
+- Audit trails and approved corrections.
+
+An accountant must not be able to silently alter a completed sale or delete its audit history.
+
+## I. Online-order packer / fulfillment staff
+
+Provide access to:
+
+- New order queue.
+- Paid, unpaid, and cash-on-delivery status.
+- Prescription-review status.
+- Stock allocation.
+- Product, strength, quantity, batch, and expiry checks.
+- Packing checklist.
+- Substitution approval workflow.
+- Dispatch preparation.
+- Pickup-ready orders.
+- Handover and fulfillment records.
+
+## J. Delivery coordinator / delivery worker
+
+Provide access to assigned deliveries, delivery details necessary for fulfillment, status updates, handover records, and delivery confirmation.
+
+Do not expose the entire customer database to delivery workers.
+
+## K. Customer support
+
+Provide access to:
+
+- Assigned customer inquiries.
+- Order-specific support.
+- Complaints and returns.
+- Delivery issues.
+- Refund request status.
+
+Restrict access to financial and health information that is not necessary for support.
+
+## L. Customer
+
+Customers may:
+
+- Browse the catalog.
+- Search products.
+- View prices and available stock information.
+- Create and manage their accounts.
+- Manage their own addresses.
+- Place eligible orders.
+- View their own orders and receipts.
+- Track deliveries.
+- Request support, cancellations, eligible returns, and refunds.
+- Manage notification preferences.
+
+Customers must never access internal reports, staff information, other customers' records, or unauthorized inventory functions.
+
+## M. Auditor / read-only reviewer
+
+Provide configurable read-only access to authorized transactions, reports, inventory movements, and audit records. The auditor must not modify operational or financial records.
+
+## N. IT administrator
+
+Provide access to technical configuration, authorized device management, system health, backup monitoring, synchronization errors, and security events without automatically granting unrestricted financial privileges.
+
+Support assigning more than one role to an individual when necessary. Use explicit permission checks and an auditable role-assignment process.
+
+# PART 4 — OWNER AND EXECUTIVE DASHBOARD
+
+Build a professional dashboard with real database-backed information.
+
+Display:
+
+- Today's sales and transaction count.
+- Sales this week, month, and selected period.
+- Net sales after eligible discounts and refunds.
+- Gross profit and gross margin when reliable cost data exists.
+- Cash, card, and mobile payment totals.
+- Outstanding or pending payment reconciliation.
+- Sales by branch.
+- Sales by cashier and shift.
+- Top-selling products.
+- Slow-moving products.
+- Low-stock products.
+- Products approaching expiry.
+- Expired, recalled, damaged, or quarantined stock.
+- Current inventory valuation using a documented costing method.
+- Purchase totals and supplier liabilities.
+- Operating expenses.
+- Returns and refund totals.
+- Outstanding customer orders.
+- Delivery and pickup status.
+- Pending approvals.
+- Stock discrepancies.
+- Inter-branch transfers in progress.
+- Offline branches and unsynchronized transactions.
+- Failed background jobs and important system alerts.
+
+Provide date filters, branch filters, product-category filters, and drill-down links to the underlying records.
+
+Do not display fabricated values when a dataset is empty. Show a helpful empty state or clearly identify unavailable metrics.
+
+Define financial calculations consistently. Distinguish sales revenue from gross profit, cash received, outstanding payments, and inventory value. Do not treat pending payments as collected revenue.
+
+# PART 5 — MEDICINE AND PRODUCT CATALOG
+
+Build a centralized product catalog suitable for a Bangladesh pharmacy.
+
+Each product should support relevant fields such as:
+
+- Internal product ID and SKU.
+- Product name and brand name.
+- Generic or active ingredient names when applicable.
+- Strength and concentration.
+- Dosage form.
+- Manufacturer.
+- Product category and subcategory.
+- Pack size and unit of measure.
+- Barcode or supported identifiers.
+- Purchase cost and cost history.
+- Retail price and authorized branch-specific pricing.
+- Wholesale price if applicable.
+- Tax configuration where applicable.
+- Prescription requirement and relevant dispensing restrictions.
+- Product images and approved documentation.
+- Supplier associations.
+- Minimum and maximum stock settings.
+- Reorder point.
+- Storage requirements where known.
+- Active, discontinued, recalled, or blocked status.
+- Created and updated metadata.
+
+Do not require medicine-specific fields for unrelated products such as hygiene items.
+
+Support pack and unit conversions. For example, when a product is purchased in a box and sold in strips, the conversion must be explicitly defined and consistently applied. Do not assume all products have the same conversion ratio.
+
+Provide:
+
+- Product creation and editing.
+- Bulk import and export.
+- Duplicate-product detection.
+- Barcode label generation.
+- Product merge with audited reference migration.
+- Search and filters.
+- Price history.
+- Stock history.
+- Supplier history.
+- Product deactivation without deleting historical transactions.
+
+Prevent accidental duplicate SKUs and invalid barcode assignments.
+
+# PART 6 — BATCH, EXPIRY, AND MEDICINE SAFETY
+
+Track inventory by batch or lot when applicable.
+
+Store:
+
+- Product.
+- Branch and stock location.
+- Batch or lot number.
+- Expiry date when applicable.
+- Received quantity.
+- Remaining quantity.
+- Purchase cost.
+- Supplier and purchase receipt reference.
+- Received date.
+- Quarantine or recall status.
+
+Support expiry-first stock selection, with safeguards that prevent selecting expired or blocked batches.
+
+Provide alerts for:
+
+- Already expired products.
+- Products approaching expiry.
+- Missing expiry information where required.
+- Recalled batches.
+- Damaged stock.
+- Unusual batch discrepancies.
+
+Allow configurable alert windows, such as 30, 60, 90, and 180 days.
+
+Support approved quarantine, disposal, supplier-return, and write-off workflows. Maintain the full stock movement and approval history.
+
+Never silently remove expired stock from the database. Prevent it from being sold while preserving its traceability.
+
+# PART 7 — POINT OF SALE (POS)
+
+Build a fast, reliable cashier interface suitable for busy pharmacy counters.
+
+Include:
+
+- Barcode scanning.
+- Search by product name, brand, generic, SKU, and barcode.
+- Keyboard-friendly operation.
+- Product and cart quantity editing.
+- Pack and unit handling.
+- Customer selection or walk-in customer.
+- Configurable discounts.
+- Approval for discounts above permitted limits.
+- Tax calculation where applicable.
+- Hold, resume, and cancel an unfinished bill.
+- Split payment where supported.
+- Cash, configured mobile payment, card, and other approved methods.
+- Change calculation for cash transactions.
+- Receipt printing and reprinting.
+- Sales history and transaction lookup.
+- Refund and return initiation.
+- Manager approval for sensitive operations.
+- Clear stock availability and insufficient-stock warnings.
+- Duplicate-scan protection.
+- Cashier notes when authorized.
+- Shift assignment and till identification.
+
+At checkout, the server or authoritative local service must revalidate prices, discounts, stock, and permissions.
+
+A completed sale must create linked records for the sale, sale lines, payments, and inventory movements. These records must remain consistent even if the device crashes or the internet disconnects during processing.
+
+Use atomic transactions where supported. If any required operation fails, do not leave a sale marked complete while its stock deduction or payment record is missing.
+
+Create unique transaction references and idempotency keys to prevent duplicate sales.
+
+# PART 8 — RETURNS, REFUNDS, AND CANCELLATIONS
+
+Implement a controlled workflow for:
+
+- Full and partial returns.
+- Refunds through supported methods.
+- Exchanges where permitted.
+- Cancelled orders.
+- Cancelled or voided sales.
+- Damaged or incorrectly supplied products.
+- Supplier returns.
+- Return reasons and supporting notes.
+- Manager approval.
+- Original transaction lookup.
+- Returned-item inspection.
+- Restock, quarantine, or disposal decisions.
+
+Do not automatically put returned medicine back into sellable stock. Require appropriate inspection and follow applicable pharmacy rules.
+
+A refund must reference the original sale or payment whenever possible.
+
+Never delete the original completed sale to represent a refund. Create linked reversal, return, or refund records and preserve the audit trail.
+
+Prevent refunds greater than the eligible amount paid, accounting for previous refunds and policy limits.
+
+# PART 9 — SHIFTS, CASH CONTROL, AND STORE OPERATIONS
+
+Implement:
+
+- Branch opening checklist.
+- Till opening balance.
+- Cashier and device assignment.
+- Shift start and end times.
+- Cash sales.
+- Cash refunds.
+- Authorized cash in/out.
+- Expense recording.
+- Expected cash calculation.
+- Actual cash declaration.
+- Cash variance.
+- Manager review and approval.
+- Shift closing report.
+- Branch closing checklist.
+- Handover notes.
+- Reopened-shift controls with audit records.
+
+Clearly distinguish the system-calculated expected cash balance from the cash physically counted.
+
+Do not allow a staff member to erase a cash discrepancy. Require a reason and appropriate review.
+
+# PART 10 — INVENTORY AND STOCK CONTROL
+
+Implement:
+
+- Live stock view by branch.
+- Stock movement ledger.
+- Goods receiving.
+- Stock adjustments.
+- Cycle counting.
+- Full physical stock counts.
+- Variance calculation.
+- Damaged and expired stock.
+- Quarantine and recall management.
+- Minimum-stock alerts.
+- Reorder suggestions.
+- Batch tracking.
+- Barcode labels.
+- Stock transfer requests.
+- Stock reservation for eligible orders.
+- Stock allocation and release.
+- Inventory valuation.
+- Slow-moving and dead-stock reports.
+- Stock aging reports.
+- Negative-stock prevention.
+
+Every stock change must have a reason, reference, timestamp, branch, user or system actor, and appropriate approval.
+
+Do not allow direct, unaudited overwriting of inventory quantities.
+
+Use a reliable inventory ledger and balance mechanism that can be reconciled. If a balance is cached for performance, it must remain consistent with the underlying stock movements.
+
+# PART 11 — MULTI-BRANCH STOCK TRANSFERS
+
+Build a transfer workflow with these stages:
+
+1. Draft request.
+2. Submitted for approval.
+3. Approved.
+4. Picking and packing.
+5. Dispatched.
+6. In transit.
+7. Partially received or fully received.
+8. Discrepancy investigation where necessary.
+9. Completed or cancelled under authorized rules.
+
+Track source branch, destination branch, quantities, batch numbers, expiry dates, dispatch user, receiving user, timestamps, and discrepancy reasons.
+
+Stock in transit must not be counted as available stock at either branch.
+
+Prevent unauthorized transfers, duplicate receipt, and receiving more than the dispatched quantity without an approved discrepancy process.
+
+Offline branches may record a local pending request, but must not falsely finalize a centrally coordinated transfer while disconnected.
+
+# PART 12 — PURCHASING AND SUPPLIER MANAGEMENT
+
+Create a supplier management module with:
+
+- Supplier name and contacts.
+- Address and business details.
+- Applicable registration or tax information where required.
+- Payment terms.
+- Supplier status.
+- Product catalog and supplier-specific product codes.
+- Purchase history.
+- Price history.
+- Outstanding invoices.
+- Supplier returns.
+- Delivery performance.
+
+Build purchase orders with:
+
+- Draft and approval states.
+- Supplier.
+- Branch or receiving location.
+- Products and quantities.
+- Expected purchase price.
+- Expected delivery.
+- Taxes or charges where applicable.
+- Payment terms.
+- Approval history.
+
+Support partial deliveries and backorders.
+
+Receiving staff must verify actual quantities, batches, expiry dates, costs, and damaged items.
+
+Compare the purchase order with the supplier invoice and goods received. Flag duplicate invoice references, unexplained price changes, quantity mismatches, and suspicious discrepancies.
+
+Support purchase returns, supplier credit notes, invoice attachments, and supplier payment reconciliation.
+
+Do not count ordered stock as physically available before it is received and accepted.
+
+# PART 13 — REORDERING AND PROCUREMENT INTELLIGENCE
+
+Create suggested purchase orders based on:
+
+- Recent sales velocity.
+- Historical demand.
+- Current available stock.
+- Reserved stock.
+- Pending purchase orders.
+- Stock in transit.
+- Supplier lead time.
+- Minimum stock.
+- Safety stock.
+- Seasonal demand where data supports it.
+- Expiry risk.
+- Minimum order quantities where configured.
+
+Show the reason behind each suggestion.
+
+Allow authorized users to edit and approve suggestions. Do not automatically place supplier orders or spend money without explicit authorization.
+
+Avoid over-ordering slow-moving or short-dated products.
+
+# PART 14 — CUSTOMER RELATIONSHIP MANAGEMENT
+
+Provide a customer directory with only necessary information:
+
+- Customer ID.
+- Name.
+- Contact details.
+- Saved addresses.
+- Consent and notification preferences.
+- Order history.
+- Eligible loyalty information.
+- Support and complaint history.
+
+Support optional loyalty points, store credit, or membership discounts only when configured and financially auditable.
+
+Prevent duplicate customer records where practical. Do not merge customers automatically when identity is uncertain.
+
+Restrict sensitive customer data according to staff permissions.
+
+# PART 15 — CUSTOMER-FACING STOREFRONT
+
+Build a professional, mobile-first storefront connected to the same authoritative product catalog and inventory as the physical stores.
+
+Customers should be able to:
+
+- Browse product categories.
+- Search medicines and pharmacy essentials.
+- Filter and sort products.
+- View product details, pack size, strength, manufacturer, price, and availability.
+- Choose an eligible branch.
+- Select pickup or delivery.
+- Add products to a cart.
+- Update quantities.
+- View a complete price breakdown.
+- Sign in or use guest checkout if supported.
+- Enter delivery details.
+- Submit prescription information where applicable.
+- Select an available payment method.
+- Receive an order confirmation.
+- Track order status.
+- Access receipts.
+- Request help, eligible cancellation, return, or refund.
+
+Show whether stock information is current or may be stale.
+
+Never guarantee availability based solely on a cached browser value.
+
+If a medicine requires a prescription or pharmacist review, make that requirement clear and enforce it during fulfillment.
+
+Do not allow unapproved medicine substitutions.
+
+Provide clear delivery fees, estimated time windows when available, cancellation terms, return policies, and contact information.
+
+Do not fabricate customer reviews, medicine claims, stock counts, discounts, or urgency messages.
+
+# PART 16 — ONLINE ORDERS AND FULFILLMENT
+
+Create an order management workflow for:
+
+- New orders.
+- Stock verification.
+- Prescription review where required.
+- Payment verification.
+- Stock reservation.
+- Picking.
+- Batch and expiry verification.
+- Packing.
+- Pickup preparation.
+- Delivery dispatch.
+- Delivery confirmation.
+- Cancellation.
+- Return and refund.
+
+Prevent two orders from reserving the same final available unit.
+
+Define order state transitions and enforce them on the backend.
+
+Use appropriate stock reservation expiry and release logic for abandoned or cancelled orders.
+
+Do not mark an order as paid without verified payment evidence. Do not mark an order as delivered merely because it was dispatched.
+
+Keep online orders and walk-in sales linked to the same stock and financial systems.
+
+# PART 17 — DELIVERY MANAGEMENT
+
+Support:
+
+- Delivery assignments.
+- Assigned driver or delivery partner.
+- Delivery address and necessary contact information.
+- Delivery fee.
+- Cash-on-delivery amount.
+- Dispatch timestamp.
+- Delivery status.
+- Customer delivery instructions.
+- Proof of delivery where appropriate.
+- Failed-delivery reasons.
+- Rescheduling.
+- Return-to-branch process.
+- COD handover and reconciliation.
+
+A driver should see only the deliveries assigned to them and the information needed to complete them.
+
+Prevent duplicate delivery confirmation and duplicate COD collection records.
+
+# PART 18 — ACCOUNTING AND FINANCIAL MANAGEMENT
+
+Implement an auditable financial layer that distinguishes operational events from accounting entries.
+
+Include:
+
+- Sales revenue.
+- Discounts.
+- Refunds and credit notes.
+- Payment collections.
+- Cash, bank, card, and configured mobile-payment settlements.
+- Operating expenses.
+- Supplier invoices and payables.
+- Customer receivables if applicable.
+- Inventory purchases.
+- Cost of goods sold.
+- Gross profit and gross margin.
+- Branch-level financial reports.
+- Cashier-level cash reconciliation.
+- Payment gateway fees where applicable.
+- Financial period closing.
+- Exportable reports.
+
+Use a documented inventory costing method, such as weighted average or FIFO, and apply it consistently. Select and document the method according to business and accounting requirements.
+
+Do not calculate gross profit using retail sales minus an arbitrary current purchase price.
+
+Distinguish:
+
+- Order value.
+- Sales revenue.
+- Amount collected.
+- Amount outstanding.
+- Refund amount.
+- Supplier liabilities.
+- Operating expenses.
+- Gross profit.
+- Net profit where all required costs are available.
+
+Do not claim net profit is accurate if payroll, rent, taxes, or other required expenses are missing.
+
+Provide expense categories, attachments where supported, approvals, and audit trails.
+
+Support Bangladesh Taka (BDT/৳) and configurable financial settings. Implement applicable tax or VAT rules only after the correct business configuration and current requirements are confirmed. Do not hardcode uncertain tax rates.
+
+# PART 19 — BANGLADESH-SPECIFIC REQUIREMENTS
+
+Design the system for Bangladesh:
+
+- Default currency: BDT (৳).
+- Use Asia/Dhaka as the default business timezone.
+- Display local dates and times consistently.
+- Provide English and a structure that supports Bangla localization.
+- Support Bangladesh phone-number validation without unnecessarily rejecting legitimate formats.
+- Support configurable branch addresses and delivery zones.
+- Prepare integration points for locally supported payment providers, including bKash and Nagad, when the merchant account and credentials are available.
+- Support cash and cash-on-delivery workflows where the business allows them.
+- Make invoice, receipt, tax, and regulatory settings configurable.
+- Provide Bangla-ready customer communication templates.
+- Respect applicable Bangladesh pharmacy, medicine dispensing, data protection, tax, consumer protection, and electronic-payment requirements.
+
+Do not assume a particular legal rule, tax rate, license, or provider API without verifying the current applicable requirements. Flag requirements that need confirmation from the business's pharmacist, accountant, legal adviser, or relevant authority.
+
+# PART 20 — OFFLINE OPERATION FOR MULTIPLE TILLS PER BRANCH
+
+This is a critical requirement.
+
+A single branch may have multiple billing tills. If the internet goes down, authorized staff must be able to continue permitted branch operations without each computer maintaining an independent and conflicting version of stock.
+
+First inspect the existing deployment and identify what offline capabilities it can genuinely support.
+
+## Required architecture
+
+For reliable multi-till offline operation, use an appropriate branch-local coordinator or server on the branch's local network. A designated local computer or dedicated device may host a branch service and transactional local database.
+
+Multiple tills connect to that shared branch service over the local network. The branch service coordinates authoritative branch-local stock, sales, shifts, and offline transaction records.
+
+Use the central cloud database for cross-branch coordination and consolidated reporting when connectivity is available.
+
+A browser PWA, service worker, and IndexedDB can cache the interface and queue safe operations, but they must not be treated as a shared multi-computer database.
+
+If the current hosting environment cannot run a branch-local service, document this limitation and implement the feasible PWA capabilities without claiming that multiple disconnected tills already share stock.
+
+## Offline transaction requirements
+
+- Each transaction receives a globally unique ID and idempotency key.
+- Local sales and stock deductions occur atomically.
+- The local service validates branch stock and prevents overselling across connected tills.
+- The local database uses durable transactions and suitable backup/recovery procedures.
+- Completed local sales are stored durably before success is shown.
+- Transactions enter a persistent synchronization outbox.
+- The system retries synchronization safely.
+- Retries must not duplicate sales, payments, or stock movements.
+- Preserve original timestamps, branch IDs, device IDs, and staff IDs.
+- Record synchronization status and errors.
+- Use explicit conflict handling and reconciliation.
+- Never silently overwrite a newer stock balance.
+- Never treat a pending central sync as a reason to lose a completed local sale.
+- Do not permit unsupported operations to proceed offline.
+
+## What may operate offline
+
+Subject to the configured branch-local service and valid local permissions:
+
+- Cash sales.
+- Barcode and product search from local data.
+- Local branch stock checks.
+- Stock deductions for completed local sales.
+- Receipts using local transaction references.
+- Shift activity and cash declarations.
+- A durable queue of transactions awaiting central synchronization.
+
+## What must be restricted or handled carefully
+
+- Online payments cannot be declared successful without provider verification.
+- New inter-branch transfers cannot be considered centrally finalized while disconnected.
+- Central stock changes cannot be assumed current during an outage.
+- Staff permission changes may not be immediately reflected offline.
+- Expiry, recall, price, and restriction information may be stale.
+- Prescription review must follow an authorized, compliant workflow.
+- High-risk refunds, stock adjustments, and other sensitive actions may require online authorization or preconfigured local approval limits.
+
+Clearly show offline status and the time of the last successful central synchronization.
+
+## Recovery and failure handling
+
+Provide:
+
+- Local service health monitoring.
+- Local database backup and restore procedures.
+- Durable synchronization queues.
+- Duplicate detection.
+- Reconciliation reports.
+- A documented recovery plan if the branch server fails.
+- A spare-device or recovery strategy appropriate to the deployment.
+- Alerts for prolonged disconnection.
+- A procedure for resolving transactions that cannot synchronize automatically.
+
+Do not promise seamless offline operation without testing the actual branch network, local service, database, and recovery procedure.
+
+# PART 21 — NOTIFICATIONS AND APPROVAL QUEUES
+
+Create a centralized notification center for relevant events:
+
+- Low stock.
+- Near-expiry products.
+- Expired or recalled batches.
+- Purchase orders requiring approval.
+- Supplier delivery discrepancies.
+- Refunds awaiting approval.
+- Excessive discounts.
+- Cash discrepancies.
+- Stock adjustments.
+- Transfer delays.
+- Unpaid or pending orders.
+- Payment reconciliation problems.
+- Delivery failures.
+- Offline synchronization errors.
+- Backup failures.
+- Security events.
+
+Provide unread counts, filtering, severity, links to the relevant record, and a clear resolution status.
+
+Support configurable in-app, email, SMS, or messaging integrations only where the service is configured. Do not expose customer or prescription information in unsecured notifications.
+
+# PART 22 — REPORTS AND EXPORTS
+
+Provide filters by date range, branch, user, product, category, supplier, and payment method where relevant.
+
+Reports should include:
+
+- Daily, weekly, and monthly sales.
+- Sales by branch.
+- Sales by cashier and shift.
+- Product performance.
+- Gross margin by product when cost data is reliable.
+- Returns and refunds.
+- Discounts.
+- Cash reconciliation.
+- Payment settlement.
+- Expenses.
+- Purchases and supplier balances.
+- Inventory valuation.
+- Low-stock products.
+- Near-expiry and expired products.
+- Stock movement and adjustments.
+- Stock count discrepancies.
+- Transfers.
+- Supplier performance.
+- Customer order fulfillment.
+- Delivery performance.
+- Offline synchronization and exception reports.
+- Audit and security events.
+
+Allow appropriate CSV, Excel, and PDF exports when the project supports them.
+
+Exports must respect permissions and date filters. Clearly state the selected period, branch, and report generation time.
+
+Do not include passwords, secrets, or unnecessary personal data in exports.
+
+# PART 23 — DATABASE DESIGN AND DATA INTEGRITY
+
+Inspect the existing schema and extend it with appropriate relationships rather than duplicating existing entities.
+
+The domain model should cover the following concepts where needed:
+
+- Organizations and branches.
+- Users and profiles.
+- Roles, permissions, and assignments.
+- Devices, tills, and shifts.
+- Products, categories, barcodes, and units.
+- Branch inventory balances.
+- Inventory movements.
+- Batches and expiry information.
+- Suppliers and supplier products.
+- Purchase orders and purchase receipts.
+- Supplier invoices and payments.
+- Sales and sale lines.
+- Payments and payment events.
+- Returns and refunds.
+- Customers and addresses.
+- Online orders and order lines.
+- Stock reservations.
+- Prescriptions and review records where applicable.
+- Deliveries and delivery events.
+- Stock transfers.
+- Expenses.
+- Approvals.
+- Notifications.
+- Audit events.
+- Synchronization outbox and conflict records.
+- Backup and system-health events where appropriate.
+
+Use foreign keys, appropriate indexes, uniqueness constraints, validation rules, and transactions.
+
+Use precise monetary types rather than floating-point arithmetic for financial values.
+
+Store timestamps consistently, preserve original business-event timestamps, and display dates in the configured business timezone.
+
+Use soft deactivation for catalog entities where historical records must remain intact. Never delete completed financial transactions as a normal editing mechanism.
+
+Keep a documented relationship between every sale, payment, refund, stock movement, purchase receipt, and transfer.
+
+# PART 24 — SECURITY AND PRIVACY
+
+Implement security from the beginning.
+
+- Reuse the existing authentication system.
+- Verify the authenticated user for every protected operation.
+- Enforce branch-level and role-level authorization.
+- Configure database row-level security or equivalent backend enforcement where appropriate.
+- Validate inputs on the server.
+- Protect against unauthorized data access, injection, insecure direct-object references, and privilege escalation.
+- Apply rate limits to sensitive endpoints where appropriate.
+- Protect file uploads and restrict access to prescriptions and private documents.
+- Store secrets in appropriate server-side environment configuration.
+- Never expose privileged database credentials in the browser.
+- Use secure session handling and appropriate session revocation.
+- Log important security events without logging passwords or sensitive payment credentials.
+- Provide backup and restore procedures.
+- Avoid storing complete card data or other payment credentials unnecessarily.
+- Provide data retention and deletion policies appropriate to legal and business requirements.
+
+Never rely on frontend-only role checks.
+
+# PART 25 — AUDIT TRAIL AND ACCOUNTABILITY
+
+Record important actions, including:
+
+- Login and relevant security events.
+- Role and permission changes.
+- Product price and cost changes.
+- Stock adjustments.
+- Purchase order approvals.
+- Receiving discrepancies.
+- Sales and refunds.
+- Discounts above configured thresholds.
+- Cash discrepancies.
+- Transfers.
+- Prescription review decisions where applicable.
+- Order state changes.
+- Payment reconciliation.
+- Financial period closing.
+- Data exports.
+- Backup and restore events.
+
+Audit records should identify the actor, action, entity, timestamp, relevant reference, reason when required, and approval details.
+
+Do not permit ordinary staff to edit or delete the audit trail.
+
+For corrections, create traceable correction or reversal events.
+
+# PART 26 — BACKUPS, DEPLOYMENT, AND OPERATIONS
+
+Provide a practical deployment and maintenance plan.
+
+Include:
+
+- Environment separation for development, testing, and production.
+- Database migration instructions.
+- Secure environment variables.
+- Production build and deployment instructions.
+- Database backup schedules.
+- Backup retention policies.
+- Recovery testing.
+- Local branch database backups where applicable.
+- Monitoring and error reporting.
+- Background-job monitoring.
+- Database migration rollback or recovery guidance.
+- Authentication and permission verification after deployment.
+- A process for updating branch-local software safely.
+- Documentation for staff and administrators.
+
+A backup is not proven reliable until restoration has been tested.
+
+Do not claim a cloud backup protects a branch-local database unless the local data is actually backed up and recoverable.
+
+# PART 27 — PROFESSIONAL UI AND USER EXPERIENCE
+
+Create a polished, consistent interface that is easy for busy staff and ordinary customers.
+
+Use:
+
+- A clear navigation structure.
+- Role-specific dashboards.
+- Fast global search where appropriate.
+- Responsive layouts.
+- Readable typography.
+- Accessible color contrast.
+- Keyboard support for POS.
+- Consistent forms and validation.
+- Clear loading, empty, success, error, and offline states.
+- Confirmation for destructive or high-risk actions.
+- Clear approval states.
+- Searchable and filterable tables.
+- Pagination for large datasets.
+- Useful date and branch filters.
+- Consistent BDT formatting.
+- Bangla-ready localization.
+- Print-friendly receipts and reports.
+
+Do not create a giant menu that exposes every function to every role.
+
+Do not build buttons that have no working behavior. Do not show sample charts as if they are real business metrics.
+
+# PART 28 — SYSTEM-WIDE SEARCH
+
+Provide a permission-aware search experience for relevant entities, such as:
+
+- Products and barcodes.
+- Sales and receipts.
+- Customers.
+- Orders.
+- Suppliers.
+- Purchase orders.
+- Batches.
+- Stock transfers.
+- Invoices.
+- Staff where authorized.
+
+Search results must respect the user's branch and permission scope.
+
+Avoid exposing private information through search suggestions.
+
+# PART 29 — TESTING REQUIREMENTS
+
+Create or extend automated tests and execute what the environment supports.
+
+At minimum, test:
+
+## Authentication and permissions
+1. Unauthorized users cannot access protected pages or APIs.
+2. A customer cannot access another customer's records.
+3. A cashier cannot access owner-only functions.
+4. A branch manager cannot modify another branch without permission.
+5. Revoked permissions are enforced online and handled safely during offline operation.
+
+## Inventory
+6. Selling stock decrements the correct branch inventory.
+7. Two tills cannot sell more stock than is available through the authoritative branch service.
+8. Expired, recalled, and quarantined batches cannot be sold.
+9. Pack-to-unit conversion is correct.
+10. Stock transfers preserve correct source, transit, and destination quantities.
+11. Inventory adjustments create auditable movements.
+12. Receiving a purchase order does not create duplicate stock.
+
+## Sales and payments
+13. A sale, its lines, payment records, and stock movements remain consistent.
+14. Retrying a request does not duplicate a sale.
+15. A pending payment cannot be reported as successful.
+16. Refunds cannot exceed the eligible amount.
+17. Discounts above configured limits require authorization.
+18. A failed transaction does not leave partial financial or stock updates.
+
+## Customers and orders
+19. Product prices and stock are revalidated during checkout.
+20. Concurrent orders cannot reserve the same final unit.
+21. Order status transitions reject invalid operations.
+22. Prescription-restricted products follow the required workflow.
+23. Customers can view their own receipts and orders.
+24. Unauthorized users cannot access private uploads.
+25. Duplicate checkout submissions do not create duplicate orders.
+
+## Offline operations
+26. Two tills connected to one branch-local service share authoritative branch stock.
+27. A cash sale survives a device or browser restart once committed locally.
+28. Reconnection synchronizes queued transactions without duplication.
+29. Sync conflicts are visible and reconciled rather than silently overwritten.
+30. A failed central connection does not cause a completed local sale to disappear.
+31. Online payments are not falsely confirmed during an outage.
+32. Backup restoration and local-service recovery are tested where the environment permits.
+
+## Reports and accounting
+33. Sales totals reconcile to the underlying transactions.
+34. Refunds and cancellations are represented consistently.
+35. Gross profit calculations use the configured costing method.
+36. Expected cash reconciles against sales, refunds, and recorded cash movements.
+37. Reports respect date filters and branch permissions.
+38. Exports do not disclose unauthorized data.
+
+Report which tests actually ran and their results. Never mark a test as passed merely because code was generated.
+
+# PART 30 — IMPLEMENTATION ROADMAP
+
+Implement the system in the following order, keeping the app usable after each phase.
+
+### Phase 1: Audit and foundation
+Inspect the project, protect existing data, document the current architecture, confirm authentication and database integration, identify migrations, and define the shared data model and permissions.
+
+### Phase 2: Core catalog and inventory
+Products, barcodes, branch stock, batch and expiry management, stock movements, receiving, and adjustment approvals.
+
+### Phase 3: POS and cashier operations
+Billing, shifts, receipts, payments, returns, discounts, and cash reconciliation.
+
+### Phase 4: Purchasing and branch operations
+Suppliers, purchase orders, goods receiving, replenishment, and inter-branch transfers.
+
+### Phase 5: Customer storefront
+Search, product pages, customer accounts, cart, checkout, orders, pickup, and delivery.
+
+### Phase 6: Financial management
+Expenses, supplier balances, payment settlement, costing, profit reporting, and exports.
+
+### Phase 7: Offline architecture
+Determine the feasible deployment model, implement the branch-local coordinator where supported, implement synchronization and recovery, and test multiple tills.
+
+### Phase 8: Management, security, and reporting
+Executive dashboards, approvals, audit trails, notifications, operational reports, access controls, and security testing.
+
+### Phase 9: Production readiness
+Run tests, fix defects, review migrations, verify backups and restore procedures, document deployment, and list remaining configuration requirements.
+
+Prioritize secure, correct, integrated workflows over building every screen at once. If the full implementation exceeds the available context or execution limits, complete the current phase coherently and maintain a clear checklist of unfinished work. Continue from the existing project rather than restarting.
+
+# PART 31 — REQUIRED FINAL REPORT
+
+After implementation, provide:
+
+1. What existed before the changes.
+2. What you actually implemented.
+3. Which files and database migrations changed.
+4. Which existing features were preserved.
+5. Which backend operations are real and persistent.
+6. Which screens still use placeholders or incomplete functionality.
+7. Which tests were run and their actual results.
+8. Which tests could not be run and why.
+9. Which external services require credentials or merchant accounts.
+10. Whether multi-till offline operation is genuinely supported by the current deployment.
+11. What deployment, backup, and security steps remain.
+12. The exact next action needed from me.
+
+Do not hide failures or missing features.
+
+## FINAL INSTRUCTION
+
+Start by inspecting my EXISTING MediStock Pharmacy project and its connected authentication and persistent storage. Then implement the highest-priority compatible improvements safely.
+
+Build one integrated pharmacy business platform for the owner, head office, branch managers, pharmacists, cashiers, inventory workers, purchasing staff, accountants, online-order staff, delivery workers, auditors, IT administrators, and customers.
+
+The system must prioritize correct stock, safe dispensing, accurate money handling, permission enforcement, reliable transactions, auditability, and a trustworthy customer experience.
+
+**Do not replace my project. Do not reset my data. Do not fabricate working features. Build and test the real system in phases.**
