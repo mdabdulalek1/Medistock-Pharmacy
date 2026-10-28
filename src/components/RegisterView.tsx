@@ -1,13 +1,16 @@
 import React, { useState } from 'react';
 import { MediStockLogo } from './MediStockLogo';
-import { Mail, Lock, User as UserIcon, Phone, CheckCircle2, ArrowRight, ShieldAlert } from 'lucide-react';
+import { Mail, Lock, User as UserIcon, Phone, ArrowRight, ShieldAlert } from 'lucide-react';
 import { User } from '../types/pharmacy';
+import { Language, getTranslation } from '../utils/i18n';
 
 interface RegisterViewProps {
   onSuccessfulRegistration: (user: User) => void;
   onNavigateLogin: () => void;
   onNavigateLanding: () => void;
   onCreateCustomerUser: (userData: { name: string; email: string; phone: string; password: string }) => User;
+  lang?: Language;
+  onToggleLang?: () => void;
 }
 
 export const RegisterView: React.FC<RegisterViewProps> = ({
@@ -15,6 +18,8 @@ export const RegisterView: React.FC<RegisterViewProps> = ({
   onNavigateLogin,
   onNavigateLanding,
   onCreateCustomerUser,
+  lang = 'en',
+  onToggleLang,
 }) => {
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
@@ -27,7 +32,11 @@ export const RegisterView: React.FC<RegisterViewProps> = ({
   const handleRegister = (e: React.FormEvent) => {
     e.preventDefault();
     if (!agreeTerms) {
-      setError('You must agree to the Terms of Service and Privacy Policy.');
+      setError(
+        lang === 'bn'
+          ? 'আপনাকে অবশ্যই সেবার শর্তাবলী ও গোপনীয়তা নীতি মেনে নিতে হবে।'
+          : 'You must agree to the Terms of Service and Privacy Policy.'
+      );
       return;
     }
     setLoading(true);
@@ -45,7 +54,7 @@ export const RegisterView: React.FC<RegisterViewProps> = ({
         onSuccessfulRegistration(newUser);
       } catch (err: any) {
         setLoading(false);
-        setError(err.message || 'Registration failed.');
+        setError(err.message || (lang === 'bn' ? 'নিবন্ধন ব্যর্থ হয়েছে।' : 'Registration failed.'));
       }
     }, 600);
   };
@@ -56,12 +65,23 @@ export const RegisterView: React.FC<RegisterViewProps> = ({
         <button onClick={onNavigateLanding} className="flex items-center gap-3">
           <MediStockLogo size="sm" />
         </button>
-        <button
-          onClick={onNavigateLogin}
-          className="text-xs font-bold text-[#079B8C] hover:underline"
-        >
-          Already have an account? Sign In
-        </button>
+        <div className="flex items-center gap-4">
+          {onToggleLang && (
+            <button
+              onClick={onToggleLang}
+              className="flex items-center gap-1.5 rounded-xl border border-[#079B8C]/30 bg-[#DDF6EF]/60 px-3 py-1.5 text-xs font-bold text-[#079B8C] hover:bg-[#DDF6EF] transition-colors shadow-2xs"
+            >
+              <span>🌐</span>
+              <span>{lang === 'en' ? 'বাংলা' : 'English'}</span>
+            </button>
+          )}
+          <button
+            onClick={onNavigateLogin}
+            className="text-xs font-bold text-[#079B8C] hover:underline"
+          >
+            {getTranslation('auth.alreadyHaveAccount', lang)}
+          </button>
+        </div>
       </header>
 
       <main className="flex-1 flex items-center justify-center p-6">
@@ -70,16 +90,20 @@ export const RegisterView: React.FC<RegisterViewProps> = ({
             <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-[#DDF6EF] text-[#079B8C] border border-[#079B8C]/20 shadow-xs">
               <UserIcon className="h-6 w-6" />
             </div>
-            <h1 className="text-2xl font-black text-[#123B5D] tracking-tight">Create Customer Account</h1>
+            <h1 className="text-2xl font-black text-[#123B5D] tracking-tight">
+              {getTranslation('auth.registerTitle', lang)}
+            </h1>
             <p className="text-xs text-slate-500">
-              Register for online medicine ordering, delivery tracking, and digital prescription vault.
+              {getTranslation('auth.registerDesc', lang)}
             </p>
           </div>
 
           <div className="rounded-2xl bg-amber-50 border border-amber-200 p-3 text-[11px] text-amber-900 flex items-start gap-2">
             <ShieldAlert className="h-4 w-4 text-[#E9A23B] shrink-0 mt-0.5" />
             <span>
-              Public registration creates a <strong>Customer</strong> account only. Staff and administrative roles require authorized corporate invitation.
+              {lang === 'bn'
+                ? 'পাবলিক নিবন্ধন কেবল গ্রাহক অ্যাকাউন্টের জন্য। স্টাফ ও প্রশাসনিক ভূমিকার জন্য অনুমোদিত আমন্ত্রণ প্রয়োজন।'
+                : 'Public registration creates a Customer account only. Staff and administrative roles require authorized corporate invitation.'}
             </span>
           </div>
 
@@ -91,14 +115,16 @@ export const RegisterView: React.FC<RegisterViewProps> = ({
 
           <form onSubmit={handleRegister} className="space-y-4 text-xs text-slate-800">
             <div className="space-y-1">
-              <label className="font-bold text-slate-700 block">Full Name</label>
+              <label className="font-bold text-slate-700 block">
+                {getTranslation('auth.fullName', lang)}
+              </label>
               <div className="relative">
                 <UserIcon className="absolute left-3.5 top-3.5 h-4 w-4 text-slate-400" />
                 <input
                   type="text"
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
-                  placeholder="e.g. Tanvir Ahmed"
+                  placeholder={lang === 'bn' ? 'যেমন: তানভীর আহমেদ' : 'e.g. Tanvir Ahmed'}
                   className="w-full rounded-xl border border-slate-300 bg-white pl-10 pr-4 py-3 text-xs text-slate-900 focus:border-[#079B8C] focus:outline-none"
                   required
                 />
@@ -107,7 +133,9 @@ export const RegisterView: React.FC<RegisterViewProps> = ({
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-1">
-                <label className="font-bold text-slate-700 block">Email Address</label>
+                <label className="font-bold text-slate-700 block">
+                  {getTranslation('auth.email', lang)}
+                </label>
                 <div className="relative">
                   <Mail className="absolute left-3.5 top-3.5 h-4 w-4 text-slate-400" />
                   <input
@@ -122,7 +150,9 @@ export const RegisterView: React.FC<RegisterViewProps> = ({
               </div>
 
               <div className="space-y-1">
-                <label className="font-bold text-slate-700 block">Phone Number (+880)</label>
+                <label className="font-bold text-slate-700 block">
+                  {getTranslation('auth.phone', lang)}
+                </label>
                 <div className="relative">
                   <Phone className="absolute left-3.5 top-3.5 h-4 w-4 text-slate-400" />
                   <input
@@ -138,14 +168,16 @@ export const RegisterView: React.FC<RegisterViewProps> = ({
             </div>
 
             <div className="space-y-1">
-              <label className="font-bold text-slate-700 block">Password</label>
+              <label className="font-bold text-slate-700 block">
+                {getTranslation('auth.password', lang)}
+              </label>
               <div className="relative">
                 <Lock className="absolute left-3.5 top-3.5 h-4 w-4 text-slate-400" />
                 <input
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="At least 6 characters"
+                  placeholder={lang === 'bn' ? 'কমপক্ষে ৬ অক্ষর' : 'At least 6 characters'}
                   className="w-full rounded-xl border border-slate-300 bg-white pl-10 pr-4 py-3 text-xs text-slate-900 focus:border-[#079B8C] focus:outline-none"
                   required
                 />
@@ -161,7 +193,7 @@ export const RegisterView: React.FC<RegisterViewProps> = ({
                 className="rounded border-slate-300 text-[#079B8C] focus:ring-[#079B8C]"
               />
               <label htmlFor="terms" className="text-[11px] text-slate-600">
-                I agree to MediStock Pharmacy <strong className="text-slate-900">Terms of Service</strong> and <strong className="text-slate-900">Privacy Policy</strong>.
+                {getTranslation('auth.agreeTerms', lang)}
               </label>
             </div>
 
@@ -171,19 +203,19 @@ export const RegisterView: React.FC<RegisterViewProps> = ({
                 disabled={loading}
                 className="w-full py-3.5 bg-[#079B8C] hover:bg-[#058276] text-white font-bold rounded-xl text-xs shadow-md transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
               >
-                <span>{loading ? 'Creating Account...' : 'Register Customer Account'}</span>
+                <span>{loading ? getTranslation('common.loading', lang) : getTranslation('auth.createAccountBtn', lang)}</span>
                 <ArrowRight className="h-4 w-4" />
               </button>
             </div>
           </form>
 
           <div className="border-t border-slate-100 pt-4 text-center text-xs text-slate-500">
-            Already have an account?{' '}
+            {getTranslation('auth.alreadyHaveAccount', lang)}{' '}
             <button
               onClick={onNavigateLogin}
               className="font-bold text-[#079B8C] hover:underline"
             >
-              Sign In
+              {getTranslation('nav.login', lang)}
             </button>
           </div>
         </div>

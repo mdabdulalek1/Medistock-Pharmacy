@@ -89,12 +89,15 @@ import { AutomatedTestRunnerView } from './components/AutomatedTestRunnerView';
 import { DeveloperControlCenterView } from './components/DeveloperControlCenterView';
 import { DeliveryRiderWorkstationView } from './components/DeliveryRiderWorkstationView';
 import { PermissionManagementView } from './components/PermissionManagementView';
+import { CustomersView } from './components/CustomersView';
+import { SettingsHub } from './components/SettingsHub';
 import { AccessDeniedView } from './components/AccessDeniedView';
 import { ROLE_TEMPLATES, hasPermission } from './types/rbac';
 import { GlobalSearchModal } from './components/GlobalSearchModal';
 import { PublicLandingView } from './components/PublicLandingView';
 import { LoginView } from './components/LoginView';
 import { RegisterView } from './components/RegisterView';
+import { AiChatWidget } from './components/AiChatWidget';
 import {
   auth,
   testFirestoreConnection,
@@ -446,17 +449,20 @@ export default function App() {
 
   if (authScreen === 'landing') {
     return (
-      <PublicLandingView
-        onShopMedicines={() => {
-          setAuthScreen('authenticated');
-          setIsStorefrontMode(true);
-        }}
-        onSignIn={() => setAuthScreen('login')}
-        onRegister={() => setAuthScreen('register')}
-        medicinesCount={medicines.length}
-        lang={lang}
-        onToggleLang={handleToggleLang}
-      />
+      <div className="relative min-h-screen">
+        <PublicLandingView
+          onShopMedicines={() => {
+            setAuthScreen('authenticated');
+            setIsStorefrontMode(true);
+          }}
+          onSignIn={() => setAuthScreen('login')}
+          onRegister={() => setAuthScreen('register')}
+          medicinesCount={medicines.length}
+          lang={lang}
+          onToggleLang={handleToggleLang}
+        />
+        <AiChatWidget lang={lang} onToggleLang={handleToggleLang} />
+      </div>
     );
   }
 
@@ -475,6 +481,8 @@ export default function App() {
         onNavigateRegister={() => setAuthScreen('register')}
         onNavigateLanding={() => setAuthScreen('landing')}
         onGoogleSignIn={handleGoogleSignIn}
+        lang={lang}
+        onToggleLang={handleToggleLang}
       />
     );
   }
@@ -502,6 +510,8 @@ export default function App() {
         }}
         onNavigateLogin={() => setAuthScreen('login')}
         onNavigateLanding={() => setAuthScreen('landing')}
+        lang={lang}
+        onToggleLang={handleToggleLang}
       />
     );
   }
@@ -553,6 +563,7 @@ export default function App() {
           pendingApprovalsCount={approvals.filter((a) => a.status === 'PENDING').length}
           isOpen={isMobileMenuOpen}
           onClose={() => setIsMobileMenuOpen(false)}
+          lang={lang}
         />
 
         {/* Dynamic Content Viewport */}
@@ -568,6 +579,8 @@ export default function App() {
                 refreshAllData();
               }}
               onSwitchToDashboard={() => setIsStorefrontMode(false)}
+              lang={lang}
+              onToggleLang={handleToggleLang}
             />
           ) : activeTab === 'dashboard' ? (
             <DashboardView
@@ -582,47 +595,128 @@ export default function App() {
               shifts={shifts}
               onSelectInvoice={(inv) => setSelectedInvoiceForModal(inv)}
             />
-          ) : activeTab === 'pos' ? (
-            <PosBillingView
-              medicines={medicines}
-              batches={batches}
-              activeBranch={activeBranch}
-              currentUser={currentUser}
-              onCheckout={handlePOSCheckout}
-              onInvoiceCreated={(inv) => setSelectedInvoiceForModal(inv)}
-            />
-          ) : activeTab === 'shifts' ? (
-            <ShiftsCashView
-              shifts={shifts}
-              branches={branches}
-              activeBranch={activeBranch}
-              currentUser={currentUser}
-              onOpenShift={handleOpenShift}
-              onCloseShift={handleCloseShift}
-            />
-          ) : activeTab === 'returns' ? (
-            <ReturnsRefundsView
-              returns={returns}
-              salesInvoices={salesInvoices}
-              currentUser={currentUser}
-              onProcessReturn={handleProcessReturn}
-            />
-          ) : activeTab === 'medicines' ? (
-            <MedicineCatalogueView
-              medicines={medicines}
-              currentUser={currentUser}
-              onAddMedicine={handleAddMedicine}
-            />
-          ) : activeTab === 'inventory' ? (
-            <BatchInventoryView
-              batches={batches}
-              medicines={medicines}
-              branches={branches}
-              activeBranchId={activeBranchId}
-              currentUser={currentUser}
-              onReceiveGoods={handleReceiveGoods}
-              onNavigateTab={(tab) => setActiveTab(tab)}
-            />
+          ) : activeTab === 'sales' || activeTab === 'pos' || activeTab === 'shifts' || activeTab === 'returns' ? (
+            <div className="space-y-4">
+              <div className="flex items-center gap-2 bg-white p-2 rounded-2xl border border-slate-200 shadow-xs">
+                <button
+                  onClick={() => setActiveTab('pos')}
+                  className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+                    activeTab === 'pos' || activeTab === 'sales'
+                      ? 'bg-[#079B8C] text-white shadow-sm'
+                      : 'text-slate-600 hover:bg-slate-100'
+                  }`}
+                >
+                  POS Billing Counter
+                </button>
+                <button
+                  onClick={() => setActiveTab('shifts')}
+                  className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+                    activeTab === 'shifts'
+                      ? 'bg-[#079B8C] text-white shadow-sm'
+                      : 'text-slate-600 hover:bg-slate-100'
+                  }`}
+                >
+                  Tills & Shifts
+                </button>
+                <button
+                  onClick={() => setActiveTab('returns')}
+                  className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+                    activeTab === 'returns'
+                      ? 'bg-[#079B8C] text-white shadow-sm'
+                      : 'text-slate-600 hover:bg-slate-100'
+                  }`}
+                >
+                  Returns & Refunds
+                </button>
+              </div>
+              {activeTab === 'shifts' ? (
+                <ShiftsCashView
+                  shifts={shifts}
+                  branches={branches}
+                  activeBranch={activeBranch}
+                  currentUser={currentUser}
+                  onOpenShift={handleOpenShift}
+                  onCloseShift={handleCloseShift}
+                />
+              ) : activeTab === 'returns' ? (
+                <ReturnsRefundsView
+                  returns={returns}
+                  salesInvoices={salesInvoices}
+                  currentUser={currentUser}
+                  onProcessReturn={handleProcessReturn}
+                />
+              ) : (
+                <PosBillingView
+                  medicines={medicines}
+                  batches={batches}
+                  activeBranch={activeBranch}
+                  currentUser={currentUser}
+                  onCheckout={handlePOSCheckout}
+                  onInvoiceCreated={(inv) => setSelectedInvoiceForModal(inv)}
+                />
+              )}
+            </div>
+          ) : activeTab === 'medicines' || activeTab === 'inventory' || activeTab === 'transfers' ? (
+            <div className="space-y-4">
+              <div className="flex items-center gap-2 bg-white p-2 rounded-2xl border border-slate-200 shadow-xs">
+                <button
+                  onClick={() => setActiveTab('medicines')}
+                  className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+                    activeTab === 'medicines'
+                      ? 'bg-[#079B8C] text-white shadow-sm'
+                      : 'text-slate-600 hover:bg-slate-100'
+                  }`}
+                >
+                  Medicine Catalogue
+                </button>
+                <button
+                  onClick={() => setActiveTab('inventory')}
+                  className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+                    activeTab === 'inventory'
+                      ? 'bg-[#079B8C] text-white shadow-sm'
+                      : 'text-slate-600 hover:bg-slate-100'
+                  }`}
+                >
+                  Batch Inventory & Expiry
+                </button>
+                <button
+                  onClick={() => setActiveTab('transfers')}
+                  className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+                    activeTab === 'transfers'
+                      ? 'bg-[#079B8C] text-white shadow-sm'
+                      : 'text-slate-600 hover:bg-slate-100'
+                  }`}
+                >
+                  Stock Transfers & Ledger
+                </button>
+              </div>
+              {activeTab === 'inventory' ? (
+                <BatchInventoryView
+                  batches={batches}
+                  medicines={medicines}
+                  branches={branches}
+                  activeBranchId={activeBranchId}
+                  currentUser={currentUser}
+                  onReceiveGoods={handleReceiveGoods}
+                  onNavigateTab={(tab) => setActiveTab(tab)}
+                />
+              ) : activeTab === 'transfers' ? (
+                <StockMovementAuditView
+                  stockMovements={stockMovements}
+                  batches={batches}
+                  medicines={medicines}
+                  branches={branches}
+                  currentUser={currentUser}
+                  onTransferStock={handleTransferStock}
+                />
+              ) : (
+                <MedicineCatalogueView
+                  medicines={medicines}
+                  currentUser={currentUser}
+                  onAddMedicine={handleAddMedicine}
+                />
+              )}
+            </div>
           ) : activeTab === 'branches' ? (
             <BranchManagementView
               branches={branches}
@@ -639,15 +733,6 @@ export default function App() {
               currentUser={currentUser}
               onNavigateTab={(tab) => setActiveTab(tab)}
             />
-          ) : activeTab === 'transfers' ? (
-            <StockMovementAuditView
-              stockMovements={stockMovements}
-              batches={batches}
-              medicines={medicines}
-              branches={branches}
-              currentUser={currentUser}
-              onTransferStock={handleTransferStock}
-            />
           ) : activeTab === 'approvals' ? (
             <ApprovalsView
               currentUser={currentUser}
@@ -656,12 +741,46 @@ export default function App() {
               branches={branches}
               onReviewApproval={handleReviewApproval}
             />
-          ) : activeTab === 'orders' ? (
-            <OnlineOrdersView
-              orders={onlineOrders}
+          ) : activeTab === 'orders' || activeTab === 'deliveries' ? (
+            <div className="space-y-4">
+              <div className="flex items-center gap-2 bg-white p-2 rounded-2xl border border-slate-200 shadow-xs">
+                <button
+                  onClick={() => setActiveTab('orders')}
+                  className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+                    activeTab === 'orders'
+                      ? 'bg-[#079B8C] text-white shadow-sm'
+                      : 'text-slate-600 hover:bg-slate-100'
+                  }`}
+                >
+                  Online Orders & Rx
+                </button>
+                <button
+                  onClick={() => setActiveTab('deliveries')}
+                  className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+                    activeTab === 'deliveries'
+                      ? 'bg-[#079B8C] text-white shadow-sm'
+                      : 'text-slate-600 hover:bg-slate-100'
+                  }`}
+                >
+                  Delivery Fleet & Riders
+                </button>
+              </div>
+              {activeTab === 'deliveries' ? (
+                <DeliveryRiderWorkstationView currentUser={currentUser} />
+              ) : (
+                <OnlineOrdersView
+                  orders={onlineOrders}
+                  currentUser={currentUser}
+                  branches={branches}
+                  onUpdateOrderStatus={handleUpdateOrderStatus}
+                />
+              )}
+            </div>
+          ) : activeTab === 'customers' ? (
+            <CustomersView
+              salesInvoices={salesInvoices}
+              onlineOrders={onlineOrders}
               currentUser={currentUser}
-              branches={branches}
-              onUpdateOrderStatus={handleUpdateOrderStatus}
             />
           ) : activeTab === 'reports' ? (
             <ReportsView
@@ -689,10 +808,22 @@ export default function App() {
               branches={branches}
               allUsers={allUsers}
             />
-          ) : activeTab === 'deliveries' ? (
-            <DeliveryRiderWorkstationView currentUser={currentUser} />
           ) : activeTab === 'settings' ? (
-            <PaymentSettingsView currentUser={currentUser} />
+            <SettingsHub
+              currentUser={currentUser}
+              branches={branches}
+              allUsers={allUsers}
+              activeBranchId={activeBranchId}
+              approvals={approvals}
+              onReviewApproval={handleReviewApproval}
+              onAddBranch={handleAddBranch}
+              onUserSwitched={(user) => {
+                setCurrentUser(user);
+                refreshAllData();
+              }}
+              lang={lang}
+              onToggleLang={handleToggleLang}
+            />
           ) : (
             <AccessDeniedView
               user={currentUser}
@@ -792,6 +923,7 @@ export default function App() {
           </div>
         </div>
       )}
+      <AiChatWidget lang={lang} onToggleLang={handleToggleLang} />
     </div>
   );
 }

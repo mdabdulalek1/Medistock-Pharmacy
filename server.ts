@@ -1,6 +1,7 @@
 import express, { Request, Response, NextFunction } from 'express';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { GoogleGenAI } from '@google/genai';
 import {
   INITIAL_BUSINESSES,
   INITIAL_BRANCHES,
@@ -1144,6 +1145,80 @@ app.get('/api/search', (req, res) => {
   const batches = db.batches.filter((b) => b.batchNumber.toLowerCase().includes(q)).slice(0, 5);
 
   res.json({ medicines, invoices, orders, batches });
+});
+
+// AI Customer Support Chatbot API Endpoint using Gemini SDK
+app.post('/api/chat', async (req, res) => {
+  try {
+    const { message, lang = 'en' } = req.body;
+    if (!message) {
+      return res.status(400).json({ error: 'Message is required' });
+    }
+
+    if (!process.env.GEMINI_API_KEY) {
+      return res.status(503).json({
+        error: 'AI_KEY_MISSING',
+        reply: lang === 'bn' 
+          ? 'দুঃখিত, এআই চ্যাটবট বর্তমানে সার্ভার এপিআই কী কনফিগারেশনের অভাবে বন্ধ রয়েছে। দয়া করে কাস্টমার সাপোর্টের সঙ্গে যোগাযোগ করুন (+880 9612-345678)।' 
+          : 'Sorry, the AI chatbot is currently unavailable due to missing API key configuration. Please contact customer support (+880 9612-345678).'
+      });
+    }
+
+    const ai = new GoogleGenAI({
+      apiKey: process.env.GEMINI_API_KEY,
+      httpOptions: {
+        headers: { 'User-Agent': 'aistudio-build' }
+      }
+    });
+
+    const query = message.toLowerCase();
+    const matchedMeds = db.medicines.filter(m => 
+      query.includes(m.brandName.toLowerCase()) || 
+      query.includes(m.genericName.toLowerCase()) ||
+      query.includes(m.category.toLowerCase())
+    );
+    const catalogContext = matchedMeds.length > 0 
+      ? matchedMeds.map(m => `- ${m.brandName} (${m.strength}, ${m.dosageForm}) by ${m.manufacturer}: ৳${m.publishedMrpPrice || 25} [In Stock]`).join('\n')
+      : db.medicines.slice(0, 12).map(m => `- ${m.brandName} (${m.strength}, ${m.dosageForm}) by ${m.manufacturer}: ৳${m.publishedMrpPrice || 25}`).join('\n');
+
+    const systemInstruction = `You are MediStock AI, the official customer support assistant for MediStock Pharmacy in Bangladesh (DGDA compliant enterprise pharmacy network).
+You assist customers in ${lang === 'bn' ? 'Bengali (বাংলা)' : 'English'}.
+Verified Medicine Catalogue Data:
+${catalogContext}
+
+You can help with:
+1. Finding medicines in our verified catalogue and checking reference prices.
+2. Explaining our delivery hubs: Dhanmondi Flagship, Gulshan-2 Premier Centre, Uttara Sector-7 Hub, and Mirpur-10 Central (Average express delivery: 45 minutes).
+3. Payment methods: bKash, Nagad, SSLCommerz, and Cash on Delivery (COD).
+4. Order placement, cancellation, and return policies (7-day unopened return policy with pharmacist inspection).
+
+PHARMACY SAFETY & POLICY CONSTRAINTS:
+- You are a customer service assistant, NOT a doctor or licensed pharmacist.
+- DO NOT diagnose diseases, prescribe medicines, or recommend personal dosages.
+- For questions about symptoms, dosages, drug interactions, pregnancy, children, or side effects, ALWAYS recommend consulting a qualified pharmacist or doctor.
+- For emergency symptoms, advise seeking immediate emergency medical care.
+- Never invent prices or stock quantities not present in our verified database.`;
+
+    const response = await ai.models.generateContent({
+      model: 'gemini-3.8-flash',
+      contents: message,
+      config: {
+        systemInstruction,
+        temperature: 0.7,
+      }
+    });
+
+    const reply = response.text || (lang === 'bn' ? 'দয়া করে আবার চেষ্টা করুন।' : 'Please try again.');
+    res.json({ success: true, reply });
+  } catch (err: any) {
+    console.error('Chat AI Error:', err);
+    res.status(500).json({
+      error: 'AI_PROCESSING_ERROR',
+      reply: req.body?.lang === 'bn' 
+        ? 'দুঃখিত, এই মুহূর্তে চ্যাটবট সেবা সাময়িকভাবে ব্যাহত হচ্ছে। দয়া করে কিছুক্ষণ পরে আবার চেষ্টা করুন।' 
+        : 'Sorry, the AI service experienced an error. Please try again in a moment.'
+    });
+  }
 });
 
 // 12. Offline Outbox Synchronization & Idempotent Central Ingestion
@@ -3071,7 +3146,13 @@ async function startServer() {
 
   if (!isProd) {
     const { createServer: createViteServer } = await import('vite');
-    const vite = await createViteServer({ server: { middlewareMode: true }, appType: 'spa' });
+    const vite = await createViteServer({
+      server: {
+        middlewareMode: true,
+        hmr: false,
+      },
+      appType: 'spa',
+    });
     app.use(vite.middlewares);
   } else {
     app.use(express.static(path.resolve(__dirname, 'dist')));

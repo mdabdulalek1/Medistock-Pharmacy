@@ -39,6 +39,7 @@ import {
   Award,
   ChevronDown,
 } from 'lucide-react';
+import { Language, getTranslation } from '../utils/i18n';
 
 interface CustomerMobileAppViewProps {
   medicines: Medicine[];
@@ -47,6 +48,8 @@ interface CustomerMobileAppViewProps {
   currentUser: User;
   onOrderCreated: (order: OnlineOrder) => void;
   onSwitchToDashboard?: () => void;
+  lang?: Language;
+  onToggleLang?: () => void;
 }
 
 export type MobileTab = 'home' | 'categories' | 'cart' | 'orders' | 'profile';
@@ -58,6 +61,8 @@ export const CustomerMobileAppView: React.FC<CustomerMobileAppViewProps> = ({
   currentUser,
   onOrderCreated,
   onSwitchToDashboard,
+  lang = 'en',
+  onToggleLang,
 }) => {
   // Mobile Navigation State
   const [activeTab, setActiveTab] = useState<MobileTab>('home');
@@ -68,8 +73,12 @@ export const CustomerMobileAppView: React.FC<CustomerMobileAppViewProps> = ({
   const [selectedPackSize, setSelectedPackSize] = useState<'10' | '20'>('10');
   const [detailQuantity, setDetailQuantity] = useState<number>(1);
   const [wishlist, setWishlist] = useState<Set<string>>(new Set(['med-001']));
+  const [toastNotice, setToastNotice] = useState<string | null>(null);
 
-  // Cart State
+  const showToast = (msg: string) => {
+    setToastNotice(msg);
+    setTimeout(() => setToastNotice(null), 3500);
+  };
   interface MobileCartItem {
     medicine: Medicine;
     quantity: number;
@@ -340,10 +349,22 @@ export const CustomerMobileAppView: React.FC<CustomerMobileAppViewProps> = ({
               {/* Branded Header & Location */}
               <div className="px-5 pt-3 flex items-center justify-between">
                 <MediStockLogo size="sm" />
-                <div className="flex items-center gap-1 text-[11px] font-semibold text-[#123B5D] bg-[#F3F7FA] px-2.5 py-1 rounded-full border border-slate-200">
-                  <MapPin className="w-3 h-3 text-[#079B8C]" />
-                  <span>Dhanmondi, Dhaka</span>
-                  <ChevronDown className="w-3 h-3 text-slate-400" />
+                <div className="flex items-center gap-2">
+                  {onToggleLang && (
+                    <button
+                      onClick={onToggleLang}
+                      className="flex items-center gap-1 rounded-full border border-[#079B8C]/30 bg-[#DDF6EF]/90 px-2 py-0.5 text-[10px] font-bold text-[#079B8C] hover:bg-[#DDF6EF] transition-colors"
+                      title="Switch language between English and Bangla"
+                    >
+                      <span>🌐</span>
+                      <span>{lang === 'en' ? 'বাংলা' : 'EN'}</span>
+                    </button>
+                  )}
+                  <div className="flex items-center gap-1 text-[11px] font-semibold text-[#123B5D] bg-[#F3F7FA] px-2.5 py-1 rounded-full border border-slate-200">
+                    <MapPin className="w-3 h-3 text-[#079B8C]" />
+                    <span>Dhanmondi, Dhaka</span>
+                    <ChevronDown className="w-3 h-3 text-slate-400" />
+                  </div>
                 </div>
               </div>
 
@@ -351,13 +372,13 @@ export const CustomerMobileAppView: React.FC<CustomerMobileAppViewProps> = ({
               <div className="mx-4 rounded-2xl bg-gradient-to-r from-[#123B5D] via-[#10486D] to-[#079B8C] text-white p-4 relative overflow-hidden shadow-sm">
                 <div className="relative z-10 max-w-[220px] space-y-1">
                   <span className="text-[10px] font-bold tracking-wider text-teal-200 uppercase block">
-                    MediStock 24/7 Delivery
+                    {lang === 'bn' ? 'মেডিসটক ২৪/৭ এক্সপ্রেস ডেলিভারি' : 'MediStock 24/7 Delivery'}
                   </span>
                   <h2 className="text-sm font-black leading-snug">
-                    আপনার পরিবারের স্বাস্থ্য সুরক্ষায় আমরা সবসময়
+                    {lang === 'bn' ? 'আপনার পরিবারের স্বাস্থ্য সুরক্ষায় আমরা সবসময়' : 'Your Family Health & Certified Medicines'}
                   </h2>
                   <p className="text-[10px] text-teal-100 opacity-90">
-                    Authentic DGDA medicines delivered to your doorstep in 45 minutes.
+                    {lang === 'bn' ? 'আসল ডিজিডিএ প্রত্যয়িত ঔষধ ৪৫ মিনিটে আপনার দোরগোড়ায়।' : 'Authentic DGDA medicines delivered to your doorstep in 45 minutes.'}
                   </p>
                 </div>
                 {/* Doctor Avatar / Healthcare Badge */}
@@ -374,7 +395,7 @@ export const CustomerMobileAppView: React.FC<CustomerMobileAppViewProps> = ({
                     type="text"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="Search medicine, health product..."
+                    placeholder={getTranslation('customer.searchPlaceholder', lang)}
                     className="w-full pl-10 pr-4 py-2.5 bg-[#F3F7FA] border border-slate-200 rounded-xl text-xs text-[#203246] placeholder-slate-400 focus:outline-hidden focus:ring-2 focus:ring-[#079B8C]"
                   />
                   {searchQuery && (
@@ -1228,12 +1249,20 @@ export const CustomerMobileAppView: React.FC<CustomerMobileAppViewProps> = ({
                   </div>
                 </div>
                 <button
-                  onClick={() => alert('150 Points redeemed! ৳ 75 discount voucher applied.')}
+                  onClick={() => showToast(lang === 'bn' ? '১৫০ লয়ালটি পয়েন্ট রিডিম হয়েছে! ৳ ৭৫ ডিসকাউন্ট ভাউচার যোগ হয়েছে।' : '150 Points redeemed! ৳ 75 discount voucher applied.')}
                   className="px-3 py-1 bg-[#E9A23B] text-white text-[11px] font-bold rounded-lg shadow-2xs hover:bg-amber-600"
                 >
-                  Redeem
+                  {lang === 'bn' ? 'ভাঙান' : 'Redeem'}
                 </button>
               </div>
+
+              {/* Toast Notice Banner inside Profile */}
+              {toastNotice && (
+                <div className="p-3 bg-[#DDF6EF] border border-[#079B8C]/30 text-[#079B8C] font-semibold text-xs rounded-xl flex items-center justify-between">
+                  <span>{toastNotice}</span>
+                  <button onClick={() => setToastNotice(null)} className="text-xs text-slate-400">✕</button>
+                </div>
+              )}
 
               {/* Settings & Menu List */}
               <div className="bg-white rounded-2xl border border-slate-200 divide-y divide-slate-100 overflow-hidden text-xs text-slate-700 shadow-2xs">
@@ -1241,7 +1270,9 @@ export const CustomerMobileAppView: React.FC<CustomerMobileAppViewProps> = ({
                   onClick={() => setIsProfileModalOpen(true)}
                   className="w-full p-3.5 flex items-center justify-between hover:bg-slate-50 transition-colors"
                 >
-                  <span className="font-semibold flex items-center gap-2">👤 Profile & Account Settings</span>
+                  <span className="font-semibold flex items-center gap-2">
+                    👤 {lang === 'bn' ? 'প্রোফাইল ও অ্যাকাউন্ট সেটিংস' : 'Profile & Account Settings'}
+                  </span>
                   <ChevronRight className="w-4 h-4 text-slate-400" />
                 </button>
 
@@ -1249,7 +1280,9 @@ export const CustomerMobileAppView: React.FC<CustomerMobileAppViewProps> = ({
                   onClick={() => setActiveTab('orders')}
                   className="w-full p-3.5 flex items-center justify-between hover:bg-slate-50 transition-colors"
                 >
-                  <span className="font-semibold flex items-center gap-2">📦 My Orders</span>
+                  <span className="font-semibold flex items-center gap-2">
+                    📦 {getTranslation('customer.myOrders', lang)}
+                  </span>
                   <ChevronRight className="w-4 h-4 text-slate-400" />
                 </button>
 
@@ -1257,33 +1290,56 @@ export const CustomerMobileAppView: React.FC<CustomerMobileAppViewProps> = ({
                   onClick={() => setIsPrescriptionModalOpen(true)}
                   className="w-full p-3.5 flex items-center justify-between hover:bg-slate-50 transition-colors"
                 >
-                  <span className="font-semibold flex items-center gap-2">📄 My Prescriptions</span>
+                  <span className="font-semibold flex items-center gap-2">
+                    📄 {getTranslation('customer.myPrescriptions', lang)}
+                  </span>
                   <ChevronRight className="w-4 h-4 text-slate-400" />
                 </button>
 
                 <button
-                  onClick={() => alert('Saved addresses: Dhanmondi (Default), Gulshan Corporate')}
+                  onClick={() => showToast(lang === 'bn' ? 'সংরক্ষিত ঠিকানা: ধানমন্ডি (ডিফল্ট), গুলশান কর্পোরেট' : 'Saved addresses: Dhanmondi (Default), Gulshan Corporate')}
                   className="w-full p-3.5 flex items-center justify-between hover:bg-slate-50 transition-colors"
                 >
-                  <span className="font-semibold flex items-center gap-2">📍 Delivery Addresses</span>
+                  <span className="font-semibold flex items-center gap-2">
+                    📍 {getTranslation('customer.deliveryAddresses', lang)}
+                  </span>
                   <ChevronRight className="w-4 h-4 text-slate-400" />
                 </button>
 
                 <button
-                  onClick={() => alert('bKash (01712-***78), Nagad, Visa ending in 4092')}
+                  onClick={() => showToast(lang === 'bn' ? 'পেমেন্ট মেথড: বিকাশ (০১৭১২-***৭৮), নগদ, ভিসা কার্ড' : 'Payment methods: bKash (01712-***78), Nagad, Visa card')}
                   className="w-full p-3.5 flex items-center justify-between hover:bg-slate-50 transition-colors"
                 >
-                  <span className="font-semibold flex items-center gap-2">💳 Payment Methods</span>
+                  <span className="font-semibold flex items-center gap-2">
+                    💳 {getTranslation('customer.paymentMethods', lang)}
+                  </span>
                   <ChevronRight className="w-4 h-4 text-slate-400" />
                 </button>
 
                 <button
-                  onClick={() => alert('MediStock Helpline: +880 1700-000000 (Open 24/7)')}
+                  onClick={() => showToast(lang === 'bn' ? 'মেডিসটক হেল্পলাইন: +৮৮০ ৯৬১২-৩৪৫৬৭৮ (২৪/৭ খোলা)' : 'MediStock Helpline: +880 9612-345678 (Open 24/7)')}
                   className="w-full p-3.5 flex items-center justify-between hover:bg-slate-50 transition-colors"
                 >
-                  <span className="font-semibold flex items-center gap-2">📞 Help & Support</span>
+                  <span className="font-semibold flex items-center gap-2">
+                    📞 {getTranslation('customer.helpSupport', lang)}
+                  </span>
                   <ChevronRight className="w-4 h-4 text-slate-400" />
                 </button>
+
+                {/* Language Preference Row with direct toggle */}
+                {onToggleLang && (
+                  <button
+                    onClick={onToggleLang}
+                    className="w-full p-3.5 flex items-center justify-between bg-slate-50/50 hover:bg-slate-100/60 transition-colors"
+                  >
+                    <span className="font-bold flex items-center gap-2 text-[#123B5D]">
+                      🌐 {getTranslation('customer.languageSetting', lang)}
+                    </span>
+                    <span className="rounded-lg border border-[#079B8C]/30 bg-[#DDF6EF] px-2.5 py-1 text-xs font-bold text-[#079B8C]">
+                      {lang === 'en' ? 'বাংলায় পরিবর্তন করুন' : 'Switch to English'}
+                    </span>
+                  </button>
+                )}
 
                 {onSwitchToDashboard && (
                   <button
@@ -1291,7 +1347,7 @@ export const CustomerMobileAppView: React.FC<CustomerMobileAppViewProps> = ({
                     className="w-full p-3.5 flex items-center justify-between bg-teal-50 text-[#079B8C] hover:bg-teal-100/50 transition-colors"
                   >
                     <span className="font-bold flex items-center gap-2">
-                      ⚙️ Switch to Pharmacy Staff Dashboard
+                      ⚙️ {getTranslation('customer.switchToStaff', lang)}
                     </span>
                     <ChevronRight className="w-4 h-4" />
                   </button>
@@ -1346,7 +1402,7 @@ export const CustomerMobileAppView: React.FC<CustomerMobileAppViewProps> = ({
             }`}
           >
             <Home className="w-5 h-5" />
-            <span className="text-[10px] font-bold mt-1">Home</span>
+            <span className="text-[10px] font-bold mt-1">{getTranslation('customer.tabHome', lang)}</span>
           </button>
 
           <button
@@ -1356,7 +1412,7 @@ export const CustomerMobileAppView: React.FC<CustomerMobileAppViewProps> = ({
             }`}
           >
             <Grid className="w-5 h-5" />
-            <span className="text-[10px] font-bold mt-1">Categories</span>
+            <span className="text-[10px] font-bold mt-1">{getTranslation('customer.tabCategories', lang)}</span>
           </button>
 
           <button
@@ -1373,7 +1429,7 @@ export const CustomerMobileAppView: React.FC<CustomerMobileAppViewProps> = ({
                 </span>
               )}
             </div>
-            <span className="text-[10px] font-bold mt-1">Cart</span>
+            <span className="text-[10px] font-bold mt-1">{getTranslation('customer.tabCart', lang)}</span>
           </button>
 
           <button
@@ -1383,7 +1439,7 @@ export const CustomerMobileAppView: React.FC<CustomerMobileAppViewProps> = ({
             }`}
           >
             <Truck className="w-5 h-5" />
-            <span className="text-[10px] font-bold mt-1">Orders</span>
+            <span className="text-[10px] font-bold mt-1">{getTranslation('customer.tabOrders', lang)}</span>
           </button>
 
           <button
@@ -1393,7 +1449,7 @@ export const CustomerMobileAppView: React.FC<CustomerMobileAppViewProps> = ({
             }`}
           >
             <UserIcon className="w-5 h-5" />
-            <span className="text-[10px] font-bold mt-1">Profile</span>
+            <span className="text-[10px] font-bold mt-1">{getTranslation('customer.tabProfile', lang)}</span>
           </button>
         </div>
 

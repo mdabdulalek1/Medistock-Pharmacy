@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { MediStockLogo } from './MediStockLogo';
-import { Mail, Lock, Eye, EyeOff, ArrowRight, ShieldCheck, AlertCircle, CheckCircle2, LogIn } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, ArrowRight, AlertCircle, LogIn } from 'lucide-react';
 import { User } from '../types/pharmacy';
+import { Language, getTranslation } from '../utils/i18n';
 
 interface LoginViewProps {
   onSuccessfulLogin: (user: User) => void;
@@ -9,6 +10,8 @@ interface LoginViewProps {
   onNavigateLanding: () => void;
   allUsers: User[];
   onGoogleSignIn?: () => void;
+  lang?: Language;
+  onToggleLang?: () => void;
 }
 
 export const LoginView: React.FC<LoginViewProps> = ({
@@ -17,6 +20,8 @@ export const LoginView: React.FC<LoginViewProps> = ({
   onNavigateLanding,
   allUsers,
   onGoogleSignIn,
+  lang = 'en',
+  onToggleLang,
 }) => {
   const [emailOrPhone, setEmailOrPhone] = useState('owner@medistock.com');
   const [password, setPassword] = useState('••••••••');
@@ -42,7 +47,7 @@ export const LoginView: React.FC<LoginViewProps> = ({
       if (matched) {
         onSuccessfulLogin(matched);
       } else {
-        // Default to first user or create a temporary session
+        // Default to first user
         onSuccessfulLogin(allUsers[0]);
       }
     }, 600);
@@ -54,12 +59,23 @@ export const LoginView: React.FC<LoginViewProps> = ({
         <button onClick={onNavigateLanding} className="flex items-center gap-3">
           <MediStockLogo size="sm" />
         </button>
-        <button
-          onClick={onNavigateRegister}
-          className="text-xs font-bold text-[#079B8C] hover:underline"
-        >
-          Create Customer Account
-        </button>
+        <div className="flex items-center gap-4">
+          {onToggleLang && (
+            <button
+              onClick={onToggleLang}
+              className="flex items-center gap-1.5 rounded-xl border border-[#079B8C]/30 bg-[#DDF6EF]/60 px-3 py-1.5 text-xs font-bold text-[#079B8C] hover:bg-[#DDF6EF] transition-colors shadow-2xs"
+            >
+              <span>🌐</span>
+              <span>{lang === 'en' ? 'বাংলা' : 'English'}</span>
+            </button>
+          )}
+          <button
+            onClick={onNavigateRegister}
+            className="text-xs font-bold text-[#079B8C] hover:underline"
+          >
+            {getTranslation('auth.createAccountLink', lang)}
+          </button>
+        </div>
       </header>
 
       <main className="flex-1 flex items-center justify-center p-6">
@@ -68,9 +84,11 @@ export const LoginView: React.FC<LoginViewProps> = ({
             <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-[#DDF6EF] text-[#079B8C] border border-[#079B8C]/20 shadow-xs">
               <LogIn className="h-6 w-6" />
             </div>
-            <h1 className="text-2xl font-black text-[#123B5D] tracking-tight">Sign In to MediStock</h1>
+            <h1 className="text-2xl font-black text-[#123B5D] tracking-tight">
+              {getTranslation('auth.loginTitle', lang)}
+            </h1>
             <p className="text-xs text-slate-500">
-              Access your role-authorized workspace, POS billing, or customer storefront.
+              {getTranslation('auth.loginDesc', lang)}
             </p>
           </div>
 
@@ -83,7 +101,9 @@ export const LoginView: React.FC<LoginViewProps> = ({
 
           <form onSubmit={handleLogin} className="space-y-4 text-xs text-slate-800">
             <div className="space-y-1">
-              <label className="font-bold text-slate-700 block">Email Address or Phone Number</label>
+              <label className="font-bold text-slate-700 block">
+                {getTranslation('auth.emailOrPhone', lang)}
+              </label>
               <div className="relative">
                 <Mail className="absolute left-3.5 top-3.5 h-4 w-4 text-slate-400" />
                 <input
@@ -99,10 +119,9 @@ export const LoginView: React.FC<LoginViewProps> = ({
 
             <div className="space-y-1">
               <div className="flex items-center justify-between">
-                <label className="font-bold text-slate-700">Password</label>
-                <span className="text-[11px] text-[#079B8C] hover:underline cursor-pointer">
-                  Forgot password?
-                </span>
+                <label className="font-bold text-slate-700">
+                  {getTranslation('auth.password', lang)}
+                </label>
               </div>
               <div className="relative">
                 <Lock className="absolute left-3.5 top-3.5 h-4 w-4 text-slate-400" />
@@ -130,7 +149,7 @@ export const LoginView: React.FC<LoginViewProps> = ({
                 disabled={loading}
                 className="w-full py-3.5 bg-[#079B8C] hover:bg-[#058276] text-white font-bold rounded-xl text-xs shadow-md transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
               >
-                <span>{loading ? 'Authenticating Session...' : 'Sign In'}</span>
+                <span>{loading ? getTranslation('common.loading', lang) : getTranslation('auth.signInBtn', lang)}</span>
                 <ArrowRight className="h-4 w-4" />
               </button>
             </div>
@@ -141,18 +160,17 @@ export const LoginView: React.FC<LoginViewProps> = ({
                 onClick={onGoogleSignIn}
                 className="w-full py-3 bg-white hover:bg-slate-50 border border-slate-300 text-slate-700 font-bold rounded-xl text-xs shadow-2xs transition-colors flex items-center justify-center gap-2"
               >
-                <span>Sign in with Google</span>
+                <span>{getTranslation('auth.googleSignIn', lang)}</span>
               </button>
             )}
           </form>
 
           <div className="border-t border-slate-100 pt-4 text-center text-xs text-slate-500">
-            Don't have a customer account?{' '}
             <button
               onClick={onNavigateRegister}
               className="font-bold text-[#079B8C] hover:underline"
             >
-              Create Account
+              {getTranslation('auth.createAccountLink', lang)}
             </button>
           </div>
         </div>

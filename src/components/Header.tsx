@@ -4,6 +4,7 @@ import { UserCheck, Building2, ShoppingBag, ShieldCheck, ChevronDown, Check, Log
 import { User as FirebaseUser } from 'firebase/auth';
 import { MediStockLogo } from './MediStockLogo';
 import { UserProfileModal } from './UserProfileModal';
+import { getTranslation, Language } from '../utils/i18n';
 
 interface HeaderProps {
   currentUser: User;
@@ -57,24 +58,8 @@ export const Header: React.FC<HeaderProps> = ({
   const activeBranch = branches.find((b) => b.id === activeBranchId);
 
   const getRoleBadgeLabel = (role: string) => {
-    switch (role) {
-      case 'owner':
-        return 'Owner (Executive)';
-      case 'admin':
-        return 'Corporate Admin';
-      case 'branch_manager':
-        return 'Branch Manager';
-      case 'pharmacist':
-        return 'A-Grade Pharmacist';
-      case 'cashier':
-        return 'POS Cashier';
-      case 'inventory_manager':
-        return 'Stock Manager';
-      case 'customer':
-        return 'Online Customer';
-      default:
-        return role;
-    }
+    const key = `header.role.${role}`;
+    return getTranslation(key, lang as Language) || role;
   };
 
   return (
@@ -117,7 +102,11 @@ export const Header: React.FC<HeaderProps> = ({
             }`}
           >
             <ShoppingBag className="h-4 w-4" />
-            <span>{isStorefrontMode ? 'Switch to ERP Dashboard' : '📱 Customer Mobile App'}</span>
+            <span>
+              {isStorefrontMode
+                ? getTranslation('header.dashboardSwitch', lang as Language)
+                : getTranslation('header.storefrontSwitch', lang as Language)}
+            </span>
             {cartCount > 0 && (
               <span className="rounded-full bg-[#079B8C] text-white px-1.5 py-0.2 text-[10px] font-mono">
                 {cartCount}
@@ -133,10 +122,10 @@ export const Header: React.FC<HeaderProps> = ({
             <button
               onClick={onOpenSearch}
               className="flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-xs text-slate-600 hover:border-[#168C8C] hover:text-[#17365D] transition-colors shadow-2xs"
-              title="Search medicines, invoices, orders (Ctrl+K)"
+              title={getTranslation('header.searchTitle', lang as Language)}
             >
               <Search className="h-3.5 w-3.5 text-[#168C8C]" />
-              <span className="hidden md:inline text-[11px]">Search...</span>
+              <span className="hidden md:inline text-[11px]">{getTranslation('header.search', lang as Language)}</span>
               <kbd className="hidden md:inline rounded bg-slate-100 px-1 py-0.5 text-[9px] font-mono text-slate-500 border border-slate-200">
                 ⌘K
               </kbd>
@@ -191,7 +180,7 @@ export const Header: React.FC<HeaderProps> = ({
               >
                 <span className={`h-2 w-2 rounded-full ${isOnline ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'}`} />
                 <Cloud className="h-3.5 w-3.5 text-[#168C8C]" />
-                <span>{isOnline ? 'Online (Synced)' : 'Offline (Local)'}</span>
+                <span>{isOnline ? getTranslation('header.online', lang as Language) : getTranslation('header.offline', lang as Language)}</span>
               </div>
             );
           })()}
